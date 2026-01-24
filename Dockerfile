@@ -2,7 +2,7 @@ FROM rust:1.63
 
 # ——————————————————————————————————————————————————— INSTALLATION ——————————————————————————————————————————————————— #
 
-COPY Source .
+COPY source .
 
 ARG NETWORKLOOKUP_BEARERTOKEN
 ARG NETWORKLOOKUP_ROUTER_DOMAIN
