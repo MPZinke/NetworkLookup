@@ -18,7 +18,7 @@ use regex::Regex;
 use reqwest::header::AUTHORIZATION;
 
 
-use crate::db_tables::device::Device;
+use crate::db_tables::Device;
 use crate::lookup_error::{NewNotFoundError, LookupError};
 use crate::search_type::{DeviceAttributeSearch, NetworkSearch};
 use crate::unknown_lookup::networks::NetworkInterface;

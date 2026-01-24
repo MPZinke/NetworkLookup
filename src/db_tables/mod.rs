@@ -11,7 +11,13 @@
 ***********************************************************************************************************************/
 
 
-pub mod group;
-pub mod device;
-pub mod network;
-pub mod service;
+mod group;
+mod device;
+mod network;
+mod service;
+
+
+pub use group::Group as Group;
+pub use device::Device as Device;
+pub use network::Network as Network;
+pub use service::Service as Service;

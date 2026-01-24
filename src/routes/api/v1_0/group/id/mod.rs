@@ -16,7 +16,7 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::group::Group;
+use crate::db_tables::Group;
 use crate::lookup_error::LookupError;
 use crate::query::{query_to_response, group::SELECT_Group_by_id};
 

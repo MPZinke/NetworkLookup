@@ -14,7 +14,7 @@
 use regex::Regex;
 
 
-use crate::db_tables::device::Device;
+use crate::db_tables::Device;
 use crate::search_type::{DeviceAttributeSearch, NetworkSearch};
 use crate::unknown_lookup::{regex_and_default_to_empty_string, networks::NetworkInterface};
 
@@ -82,7 +82,7 @@ impl NetworkInterface for Netgear
 		let mac: String = regex_and_default_to_empty_string(&mac_regex, section);
 
 		return Device{id: -1, address: Some(address), label: label, is_reservation: false, is_static: false,
-		  mac: Some(mac), groups: vec![], Network: network.network().clone()};
+		  mac: Some(mac), groups: vec![], network: network.network().clone()};
 	}	
 }
 

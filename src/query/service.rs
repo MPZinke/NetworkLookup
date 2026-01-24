@@ -14,7 +14,7 @@
 use sqlx::{query, PgPool, postgres::PgRow, Row};
 
 
-use crate::db_tables::{service::Service, group::Group};
+use crate::db_tables::{Device, Service, Group, Network};
 use crate::lookup_error::LookupError;
 use crate::query::group::SELECT_Groups_by_Device_id;
 
@@ -44,7 +44,14 @@ pub async fn SELECT_Service_by_Network_id_AND_Service_label(pool: &PgPool, Netwo
 	for row in result
 	{
 		let groups: Vec<Group> = SELECT_Groups_by_Device_id(pool, row.get("Device.id")).await?;
-		services.push(Service::new(groups, &row));
+		let network = Network::new(
+			row.get("Network.id"),
+			row.get("Network.label"),
+			row.get("gateway"),
+			row.get("netmask")
+		);
+		let device = Device::new(groups, network, &row);
+		services.push(Service::new(device, &row));
 	}
 
 	return Ok(services);
@@ -76,7 +83,14 @@ pub async fn SELECT_Device_by_Network_label_AND_Service_label(pool: &PgPool, Net
 	for row in result
 	{
 		let groups: Vec<Group> = SELECT_Groups_by_Device_id(pool, row.get("Device.id")).await?;
-		services.push(Service::new(groups, &row));
+		let network = Network::new(
+			row.get("Network.id"),
+			row.get("Network.label"),
+			row.get("gateway"),
+			row.get("netmask")
+		);
+		let device = Device::new(groups, network, &row);
+		services.push(Service::new(device, &row));
 	}
 
 	return Ok(services);

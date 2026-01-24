@@ -11,7 +11,7 @@
 ***********************************************************************************************************************/
 
 
-use crate::db_tables::network::Network;
+use crate::db_tables::Network;
 
 
 pub enum DeviceAttributeSearch

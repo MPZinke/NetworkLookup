@@ -15,7 +15,7 @@ use sqlx::{postgres::PgRow, Row};
 use serde::Serialize;
 
 
-use crate::db_tables::{device::Device, group::Group};
+use crate::db_tables::{Device, Group};
 
 
 #[derive(Debug, Serialize)]
@@ -31,14 +31,14 @@ pub struct Service
 
 impl Service
 {
-	pub fn new(groups: Vec<Group>, row: &PgRow) -> Service
+	pub fn new(device: Device, row: &PgRow) -> Service
 	{
 		return Service{
 			id: row.get("Service.id"),
 			label: row.get("Service.label"),
 			port: row.get("port"),
 			auth_value: row.get("Service.auth_value"),
-			device: Device::new(groups, row)
+			device: device
 		};
 	}
 }

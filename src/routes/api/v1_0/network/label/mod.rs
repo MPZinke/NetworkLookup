@@ -21,7 +21,7 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::network::Network;
+use crate::db_tables::Network;
 use crate::lookup_error::LookupError;
 use crate::query::{query_to_response, network::SELECT_Network_by_label};
 

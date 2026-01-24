@@ -17,7 +17,7 @@ use actix_web_httpauth::extractors::bearer::BearerAuth;
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::service::Service;
+use crate::db_tables::Service;
 use crate::lookup_error::LookupError;
 use crate::query::{query_to_response, service::SELECT_Device_by_Network_label_AND_Service_label};
 

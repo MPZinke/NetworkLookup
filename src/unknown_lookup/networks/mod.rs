@@ -14,7 +14,7 @@
 pub mod netgear;
 
 
-use crate::db_tables::device::Device;
+use crate::db_tables::Device;
 use crate::lookup_error::LookupError;
 use crate::search_type::{DeviceAttributeSearch, NetworkSearch};
 use crate::unknown_lookup;

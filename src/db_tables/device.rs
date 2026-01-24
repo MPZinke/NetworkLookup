@@ -15,7 +15,7 @@ use sqlx::{postgres::PgRow, Row};
 use serde::Serialize;
 
 
-use crate::db_tables::{group::Group, network::Network};
+use crate::db_tables::{Group, Network};
 
 
 #[derive(Debug, Serialize)]

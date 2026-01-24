@@ -14,7 +14,7 @@
 use sqlx::{query, PgPool, postgres::PgRow, Row};
 
 
-use crate::db_tables::network::Network;
+use crate::db_tables::Network;
 use crate::lookup_error::{NewNotFoundError, LookupError};
 
 
