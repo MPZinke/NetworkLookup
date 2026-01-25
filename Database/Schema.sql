@@ -17,6 +17,7 @@ CREATE TABLE "Networks"
 (
 	"id" SERIAL NOT NULL PRIMARY KEY,
 	"label" VARCHAR(32) NOT NULL DEFAULT '' UNIQUE,
+	"credentials" TEXT DEFAULT NULL,
 	"gateway" VARCHAR(15) NOT NULL,
 	"netmask" VARCHAR(15) NOT NULL
 );

@@ -15,7 +15,7 @@ use sqlx::{query, PgPool, Row, postgres::PgRow};
 
 
 use crate::db_tables::Group;
-use crate::lookup_error::{LookupError, new_not_found_error};
+use crate::lookup_error::LookupError;
 
 
 pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
@@ -32,24 +32,6 @@ pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
 		groups.push(row.get("label"));
 	}
 	return Ok(groups);
-}
-
-
-pub async fn get_group_by_id(pool: &PgPool, id: i32) -> Result<Group, LookupError>
-{
-	let query_str: &str = r#"
-		SELECT *
-		FROM "Groups"
-		WHERE "id" = $1;
-	"#;
-	let result: sqlx::Result<PgRow> = query(query_str).bind(id).fetch_one(pool).await;
-	let row = match(result)
-	{
-		Ok(row) => row,
-		Err(_) => return Err(new_not_found_error(format!("No results found for `Group`.`id`: '{}'", id)))
-	};
-
-	return Ok(row.get("label"));
 }
 
 

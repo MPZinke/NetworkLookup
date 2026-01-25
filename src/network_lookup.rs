@@ -18,11 +18,12 @@
 
 mod db_tables;
 mod lookup_error;
+mod network;
 mod query;
 mod routes;
 
 
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, HttpServer, middleware::Logger};
 use sqlx::postgres::PgPool;
 
 
@@ -50,13 +51,14 @@ async fn main() -> std::io::Result<()>
 			.route("/", web::get().to(routes::index))
 			.route("/api", web::get().to(api::index))
 			.route("/api/groups", web::get().to(api::groups::index))
-			.route("/api/groups/{id}", web::get().to(api::groups::id))
+			.route("/api/groups/{label}", web::get().to(api::groups::label))
 			.route("/api/networks", web::get().to(api::networks::index))
 			.route("/api/networks/{id}", web::get().to(api::networks::id))
 			.route("/api/networks/{network_id}/devices", web::get().to(api::networks::devices::index))
 			.route("/api/networks/{network_id}/devices/{device_id}", web::get().to(api::networks::devices::id))
 			.route("/api/services", web::get().to(api::services::index))
 			.route("/api/services/{id}", web::get().to(api::services::id))
+			.wrap(Logger::default())
 		}
 	)
 	.bind("0.0.0.0:443")?

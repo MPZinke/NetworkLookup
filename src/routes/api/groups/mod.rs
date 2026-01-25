@@ -15,9 +15,9 @@ use actix_web::{HttpResponse, web};
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::Group;
+use crate::db_tables::{Device, Group};
 use crate::lookup_error::LookupError;
-use crate::query::{query_to_response, groups::{get_groups, get_group_by_id}};
+use crate::query::{query_to_response, devices::get_devices_by_group_label, groups::get_groups};
 
 
 // `/api/groups`
@@ -28,10 +28,10 @@ pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 }
 
 
-// `/api/groups/{id}`
-pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
+// `/api/groups/{label}`
+pub async fn label(path: web::Path<String>, pool: web::Data<PgPool>) -> HttpResponse
 {
-	let id = path.into_inner();
-	let query_response: Result<Group, LookupError> = get_group_by_id(pool.as_ref(), id).await;
+	let label = path.into_inner();
+	let query_response: Result<Vec<Device>, LookupError> = get_devices_by_group_label(pool.as_ref(), label).await;
 	return query_to_response(query_response);
 }
