@@ -2,7 +2,7 @@
 /***********************************************************************************************************************
 *                                                                                                                      *
 *   created by: MPZinke                                                                                                *
-*   on 2022.05.08                                                                                                      *
+*   on 2022.05.05                                                                                                      *
 *                                                                                                                      *
 *   DESCRIPTION: TEMPLATE                                                                                              *
 *   BUGS:                                                                                                              *
@@ -11,38 +11,30 @@
 ***********************************************************************************************************************/
 
 
-use actix_web::{HttpResponse, http::header::ContentType, web};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
+pub mod devices;
+
+
+use actix_web::{HttpResponse, web};
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::Group;
+use crate::db_tables::Network;
 use crate::lookup_error::LookupError;
-use crate::query::{query_to_response, group::SELECT_Group_by_id};
+use crate::query::{query_to_response, networks::{get_networks, get_network_by_id}};
 
 
-// `/api/v1.0/group/id`
-pub async fn index() -> HttpResponse
+// `/api/networks`
+pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 {
-	let body: &str = r#"
-	{
-		"/api/v1.0/group/id/{group_id}": "Get a group by ID"
-	}
-	"#;
-
-	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);
+	let query_response: Result<Vec<Network>, LookupError> = get_networks(pool.as_ref()).await;
+	return query_to_response(query_response);
 }
 
 
-// `/api/v1.0/group/id/{group_id}`
-pub async fn id(auth: BearerAuth, path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
+// `/api/networks/{network_id}`
+pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
 {
-	if(env!("NETWORKLOOKUP_BEARERTOKEN") != auth.token())
-	{
-		return HttpResponse::Unauthorized().insert_header(ContentType::json()).body(r#"{"error": "Unauthorized"}"#);
-	}
-
-	let id = path.into_inner();
-	let query_response: Result<Group, LookupError> = SELECT_Group_by_id(pool.as_ref(), id).await;
+	let id: i32 = path.into_inner();
+	let query_response: Result<Network, LookupError> = get_network_by_id(pool.as_ref(), id).await;
 	return query_to_response(query_response);
 }

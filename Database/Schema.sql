@@ -61,6 +61,7 @@ CREATE TABLE "Services"
 	"port" SMALLINT NOT NULL DEFAULT 443,
 	"auth_value" TEXT DEFAULT NULL,
 	"Devices.id" INT NOT NULL REFERENCES "Devices"("id") ON DELETE CASCADE,
+	"Networks.id" INT NOT NULL REFERENCES "Networks"("id") ON DELETE CASCADE,
 	UNIQUE("label", "Devices.id")
 );
 

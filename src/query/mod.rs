@@ -11,10 +11,10 @@
 ***********************************************************************************************************************/
 
 
-pub mod device;
-pub mod group;
-pub mod network;
-pub mod service;
+pub mod devices;
+pub mod groups;
+pub mod networks;
+pub mod services;
 
 
 use actix_web::{http::header::ContentType, HttpResponse, HttpResponseBuilder};

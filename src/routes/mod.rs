@@ -22,7 +22,7 @@ pub async fn index() -> HttpResponse
 {
 	let body: &str = r#"
 	{
-		"api": "The API for all active protocols"
+		"/api": "The API for all active protocols"
 	}
 	"#;
 	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);

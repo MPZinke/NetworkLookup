@@ -11,22 +11,49 @@
 ***********************************************************************************************************************/
 
 
-use sqlx::{postgres::PgRow, Row};
-use serde::Serialize;
+use sqlx::{query, PgPool, postgres::PgRow, Row};
 
 
-#[derive(Debug, Serialize)]
-pub struct Group
+use crate::db_tables::Network;
+use crate::lookup_error::{NewNotFoundError, LookupError};
+
+
+pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
 {
-	pub id: i32,
-	pub label: String
+	let query_str: &str = r#"
+		SELECT *
+		FROM "Networks";
+	"#;
+	let result: Vec<PgRow> = query(query_str).fetch_all(pool).await?;
+
+	let mut networks: Vec<Network> = vec![];
+	for row in result
+	{
+		networks.push(Network::new(row.get("id"), row.get("label"), row.get("gateway"), row.get("netmask")));
+	}
+	return Ok(networks);
 }
 
 
-impl Group
+pub async fn get_network_by_id(pool: &PgPool, id: i32) -> Result<Network, LookupError>
 {
-	pub fn new(row: &PgRow) -> Group
+	let query_str: &str = r#"
+		SELECT *
+		FROM "Networks"
+		WHERE "id" = $1;
+	"#;
+	let result: Vec<PgRow> = query(query_str).bind(id).fetch_all(pool).await?;
+	if(result.len() < 1)
 	{
-		return Group {id: row.get("id"), label: row.get("label")};
+		return Err(NewNotFoundError(format!("No results found for `Network`.`id`: '{}'", id)));
 	}
+
+	return Ok(
+		Network::new(
+			result[0].get("id"),
+			result[0].get("label"),
+			result[0].get("gateway"),
+			result[0].get("netmask")
+		)
+	);
 }

@@ -11,7 +11,9 @@
 ***********************************************************************************************************************/
 
 
-pub mod v1_0;
+pub mod groups;
+pub mod networks;
+pub mod services;
 
 
 use actix_web::{HttpResponse, http::header::ContentType};
@@ -22,8 +24,11 @@ pub async fn index() -> HttpResponse
 {
 	let body: &str = r#"
 	{
-		"/api/v1.0": "The current version of this API"
+		"/api/groups": "Queries for groups",
+		"/api/networks": "Queries for networks",
+		"/api/services": "Queries for services"
 	}
 	"#;
 	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);
+
 }

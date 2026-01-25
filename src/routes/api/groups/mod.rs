@@ -11,38 +11,27 @@
 ***********************************************************************************************************************/
 
 
-use actix_web::{http::header::ContentType, HttpResponse, web};
-use actix_web_httpauth::extractors::bearer::BearerAuth;
+use actix_web::{HttpResponse, web};
 use sqlx::postgres::PgPool;
 
 
-use crate::db_tables::Device;
+use crate::db_tables::Group;
 use crate::lookup_error::LookupError;
-use crate::query::{query_to_response, device::SELECT_Device_by_Network_label_AND_Device_id};
+use crate::query::{query_to_response, groups::{get_groups, get_group_by_id}};
 
 
-// `/api/v1.0/network/label/{network_label}/device/id`
-pub async fn index() -> HttpResponse
+// `/api/groups`
+pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 {
-	let body: &str = r#"
-	{
-		"/api/v1.0/network/label/{network_label}/device/id/{device_id}": "Get a device by device id and network label"
-	}
-	"#;
-	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);
+	let query_response: Result<Vec<Group>, LookupError> = get_groups(pool.as_ref()).await;
+	return query_to_response(query_response);
 }
 
 
-// `/api/v1.0/network/label/{network_label}/device/id/{device_id}`
-pub async fn id(auth: BearerAuth, path: web::Path<(String, i32)>, pool: web::Data<PgPool>) -> HttpResponse
+// `/api/groups/{id}`
+pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
 {
-	if(env!("NETWORKLOOKUP_BEARERTOKEN") != auth.token())
-	{
-		return HttpResponse::Unauthorized().insert_header(ContentType::json()).body(r#"{"error": "Unauthorized"}"#);
-	}
-
-	let (Network_label, Device_id) = path.into_inner();
-	let query_response: Result<Device, LookupError> = SELECT_Device_by_Network_label_AND_Device_id(pool.as_ref(),
-	  &Network_label, Device_id).await;
+	let id = path.into_inner();
+	let query_response: Result<Group, LookupError> = get_group_by_id(pool.as_ref(), id).await;
 	return query_to_response(query_response);
 }
