@@ -26,33 +26,6 @@ use crate::lookup_error::LookupError;
 
 
 /*
-SUMMARY: Determines whether the query is a NotFound lookup_error.
-PARAMS:  Takes the generic Response.
-DETAILS: Unwraps the Result & lookup_error if Result is an lookup_error.
-RETURNS: If the unwrapped lookup_error is NotFound, returns True, otherwise False.
-*/
-pub fn query_NotFound<T: Serialize>(generic_query: &Result<T, LookupError>) -> bool
-{
-	match(generic_query)
-	{
-		Ok(_) => return false,
-		Err(error)
-		=>
-		{
-			match(error)
-			{
-				LookupError::NotFound(_) => return true,
-				LookupError::Generic(_) => return false,
-				LookupError::InvalidHeader(_) => return false,
-				LookupError::Postgres(_) => return false,
-				LookupError::Request(_) => return false
-			}
-		}
-	}
-}
-
-
-/*
 SUMMARY: Unwraps the Result and returns an HttpResponse type.
 PARAMS:  Takes the generic Result to unwrap.
 DETAILS: Unwraps the Result. If Result is Ok, then it attempts to convert the result to a JSON. If the Result is an
@@ -70,7 +43,7 @@ pub fn query_to_response<T: Serialize>(generic_query: Result<T, LookupError>) ->
 			let response: fn() -> HttpResponseBuilder = match(error)
 			{
 				LookupError::NotFound(_) => HttpResponse::NotFound,
-				LookupError::Generic(_) => HttpResponse::InternalServerError,
+				// LookupError::Generic(_) => HttpResponse::InternalServerError,
 				LookupError::InvalidHeader(_) => HttpResponse::InternalServerError,
 				LookupError::Postgres(_) => HttpResponse::InternalServerError,
 				LookupError::Request(_) => HttpResponse::InternalServerError

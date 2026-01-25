@@ -11,11 +11,11 @@
 ***********************************************************************************************************************/
 
 
-use sqlx::{query, PgPool, postgres::PgRow};
+use sqlx::{query, PgPool, Row, postgres::PgRow};
 
 
 use crate::db_tables::Group;
-use crate::lookup_error::{NewNotFoundError, LookupError};
+use crate::lookup_error::{LookupError, new_not_found_error};
 
 
 pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
@@ -29,7 +29,7 @@ pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
 	let mut groups: Vec<Group> = vec![];
 	for row in result
 	{
-		groups.push(Group::new(&row));
+		groups.push(row.get("label"));
 	}
 	return Ok(groups);
 }
@@ -42,13 +42,14 @@ pub async fn get_group_by_id(pool: &PgPool, id: i32) -> Result<Group, LookupErro
 		FROM "Groups"
 		WHERE "id" = $1;
 	"#;
-	let result: Vec<PgRow> = query(query_str).bind(id).fetch_all(pool).await?;
-
-	if(result.len() < 1)
+	let result: sqlx::Result<PgRow> = query(query_str).bind(id).fetch_one(pool).await;
+	let row = match(result)
 	{
-		return Err(NewNotFoundError(format!("No results found for `Group`.`id`: '{}'", id)));
-	}
-	return Ok(Group::new(&result[0]));
+		Ok(row) => row,
+		Err(_) => return Err(new_not_found_error(format!("No results found for `Group`.`id`: '{}'", id)))
+	};
+
+	return Ok(row.get("label"));
 }
 
 
@@ -66,7 +67,7 @@ pub async fn get_groups_by_device_id(pool: &PgPool, device_id: i32) -> Result<Ve
 	let mut groups: Vec<Group> = vec![];
 	for row in result
 	{
-		groups.push(Group::new(&row));
+		groups.push(row.get("label"));
 	}
 	return Ok(groups);
 }

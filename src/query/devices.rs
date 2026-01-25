@@ -15,7 +15,7 @@ use sqlx::{query, PgPool, postgres::PgRow, Row};
 
 
 use crate::db_tables::{Device, Group, Network};
-use crate::lookup_error::{LookupError, NewNotFoundError};
+use crate::lookup_error::{LookupError, new_not_found_error};
 use crate::query::groups::get_groups_by_device_id;
 
 
@@ -37,29 +37,30 @@ pub async fn get_device_by_network_id_and_device_id(
 		WHERE "Networks"."id" = $1
 			AND "Devices"."id" = $2;
 	"#;
-	let result: Vec<PgRow> = query(query_str)
-		.bind(network_id.clone())
-		.bind(device_id.clone())
-		.fetch_all(pool).await?;
-
-	if(result.len() < 1)
+	let result: sqlx::Result<PgRow> = query(query_str).bind(network_id).bind(device_id).fetch_one(pool).await;
+	let row = match(result)
 	{
-		let message: String = format!(
-			"No results found for `Network`.`id`: '{}', `Device`.`id`: '{}'",
-			network_id,
-			device_id
-		);
-		return Err(NewNotFoundError(message));
-	}
+		Ok(row) => row,
+		Err(_)
+		=>
+		{
+			let message: String = format!(
+				"No results found for `Network`.`id`: '{}', `Device`.`id`: '{}'",
+				network_id,
+				device_id
+			);
+			return Err(new_not_found_error(message));
+		}
+	};
 
 	let groups: Vec<Group> = get_groups_by_device_id(pool, device_id).await?;
-	let network = Network::new(
-		result[0].get("Networks.id"),
-		result[0].get("Networks.label"),
-		result[0].get("Networks.gateway"),
-		result[0].get("Networks.netmask")
-	);
-	return Ok(Device::new(groups, network, &result[0]));
+	let network = Network {
+		id: row.get("Networks.id"),
+		label: row.get("Networks.label"),
+		gateway: row.get("Networks.gateway"),
+		netmask: row.get("Networks.netmask")
+	};
+	return Ok(Device::new(&row, groups, network));
 }
 
 
@@ -84,13 +85,13 @@ pub async fn get_devices_by_network_id(
 	for row in result
 	{
 		let groups: Vec<Group> = get_groups_by_device_id(pool, row.get("id")).await?;
-		let network = Network::new(
-			row.get("Networks.id"),
-			row.get("Networks.label"),
-			row.get("Networks.gateway"),
-			row.get("Networks.netmask")
-		);
-		devices.push(Device::new(groups, network, &row));
+		let network = Network {
+			id: row.get("Networks.id"),
+			label: row.get("Networks.label"),
+			gateway: row.get("Networks.gateway"),
+			netmask: row.get("Networks.netmask")
+		};
+		devices.push(Device::new(&row, groups, network));
 	}
 
 	return Ok(devices);

@@ -18,7 +18,7 @@
 #[derive(Debug)]
 pub enum LookupError
 {
-	Generic(std::io::Error),
+	// Generic(std::io::Error),
 	InvalidHeader(reqwest::header::InvalidHeaderValue),
 	NotFound(std::io::Error),
 	Postgres(sqlx::error::Error),
@@ -32,7 +32,7 @@ impl std::fmt::Display for LookupError
 	{
 		match(self)
 		{
-			LookupError::Generic(error) => write!(format, "{}", error),
+			// LookupError::Generic(error) => write!(format, "{}", error),
 			LookupError::InvalidHeader(error) => write!(format, "{}", error),
 			LookupError::NotFound(error) => write!(format, "{}", error),
 			LookupError::Postgres(error) => write!(format, "{}", error),
@@ -80,7 +80,7 @@ impl From<reqwest::Error> for LookupError
 
 // ———————————————————————————————————————————————— HELPER FUNCTIONS ———————————————————————————————————————————————— //
 
-pub fn NewNotFoundError(message: String) -> LookupError
+pub fn new_not_found_error(message: String) -> LookupError
 {
 	return LookupError::NotFound(std::io::Error::new(std::io::ErrorKind::NotFound, message));
 }

@@ -11,17 +11,15 @@
 ***********************************************************************************************************************/
 
 
-#![allow(non_snake_case)]
+// #![allow(non_snake_case)]
 #![allow(unused_parens)]
-#![allow(non_camel_case_types)]
+// #![allow(non_camel_case_types)]
 
 
 mod db_tables;
 mod lookup_error;
 mod query;
 mod routes;
-mod search_type;
-mod unknown_lookup;
 
 
 use actix_web::{web, App, HttpServer};
@@ -39,31 +37,29 @@ async fn main() -> std::io::Result<()>
 	let password: &str = env!("NETWORKLOOKUP_DB_PASSWORD");
 	let db_name: &str = "NetworkLookup";
 
-	println!("Connecting to DB");
 	let connection_str: String = format!("postgres://{}:{}@{}:5432/{}", user, password, host, db_name);
 	let connection_pool: PgPool = PgPool::connect(&connection_str)
-		.await
-		.expect("Failed to create Postgres DB connection pool");
+	.await
+	.expect("Failed to create Postgres DB connection pool");
 
-	println!("Initializing Server");
 	HttpServer::new
 	(
 		move ||
 		{
 			App::new().app_data(web::Data::new(connection_pool.clone()))
-				.route("/", web::get().to(routes::index))
-				.route("/api", web::get().to(api::index))
-				.route("/api/groups", web::get().to(api::groups::index))
-				.route("/api/groups/{id}", web::get().to(api::groups::id))
-				.route("/api/networks", web::get().to(api::networks::index))
-				.route("/api/networks/{id}", web::get().to(api::networks::id))
-				.route("/api/networks/{network_id}/devices", web::get().to(api::networks::devices::index))
-				.route("/api/networks/{network_id}/devices/{device_id}", web::get().to(api::networks::devices::id))
-				.route("/api/services", web::get().to(api::services::index))
-				.route("/api/services/{id}", web::get().to(api::services::id))
+			.route("/", web::get().to(routes::index))
+			.route("/api", web::get().to(api::index))
+			.route("/api/groups", web::get().to(api::groups::index))
+			.route("/api/groups/{id}", web::get().to(api::groups::id))
+			.route("/api/networks", web::get().to(api::networks::index))
+			.route("/api/networks/{id}", web::get().to(api::networks::id))
+			.route("/api/networks/{network_id}/devices", web::get().to(api::networks::devices::index))
+			.route("/api/networks/{network_id}/devices/{device_id}", web::get().to(api::networks::devices::id))
+			.route("/api/services", web::get().to(api::services::index))
+			.route("/api/services/{id}", web::get().to(api::services::id))
 		}
 	)
-		.bind("0.0.0.0:8081")?
-		.run()
-		.await
+	.bind("0.0.0.0:443")?
+	.run()
+	.await
 }

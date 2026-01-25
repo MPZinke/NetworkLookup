@@ -11,11 +11,11 @@
 ***********************************************************************************************************************/
 
 
-use sqlx::{query, PgPool, postgres::PgRow, Row};
+use sqlx::{query, PgPool, postgres::PgRow};
 
 
 use crate::db_tables::Network;
-use crate::lookup_error::{NewNotFoundError, LookupError};
+use crate::lookup_error::{new_not_found_error, LookupError};
 
 
 pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
@@ -29,7 +29,7 @@ pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
 	let mut networks: Vec<Network> = vec![];
 	for row in result
 	{
-		networks.push(Network::new(row.get("id"), row.get("label"), row.get("gateway"), row.get("netmask")));
+		networks.push(Network::new(&row));
 	}
 	return Ok(networks);
 }
@@ -42,18 +42,12 @@ pub async fn get_network_by_id(pool: &PgPool, id: i32) -> Result<Network, Lookup
 		FROM "Networks"
 		WHERE "id" = $1;
 	"#;
-	let result: Vec<PgRow> = query(query_str).bind(id).fetch_all(pool).await?;
-	if(result.len() < 1)
+	let result: sqlx::Result<PgRow> = query(query_str).bind(id).fetch_one(pool).await;
+	let row = match(result)
 	{
-		return Err(NewNotFoundError(format!("No results found for `Network`.`id`: '{}'", id)));
-	}
+		Ok(row) => row,
+		Err(_) => return Err(new_not_found_error(format!("No results found for `Networks`.`id`: '{}'", id)))
+	};
 
-	return Ok(
-		Network::new(
-			result[0].get("id"),
-			result[0].get("label"),
-			result[0].get("gateway"),
-			result[0].get("netmask")
-		)
-	);
+	return Ok(Network::new(&row));
 }

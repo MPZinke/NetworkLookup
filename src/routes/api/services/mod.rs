@@ -32,6 +32,6 @@ pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
 {
 	let id: i32 = path.into_inner();
-	let query_response: Result<Vec<Service>, LookupError> = get_service_by_id(pool.as_ref(), id).await;
+	let query_response: Result<Service, LookupError> = get_service_by_id(pool.as_ref(), id).await;
 	return query_to_response(query_response);
 }

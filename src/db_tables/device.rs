@@ -11,11 +11,14 @@
 ***********************************************************************************************************************/
 
 
-use sqlx::{postgres::PgRow, Row};
+use sqlx::{Row, postgres::PgRow};
 use serde::Serialize;
 
 
-use crate::db_tables::{Group, Network};
+use crate::db_tables::Network;
+
+
+pub type Group = String;
 
 
 #[derive(Debug, Serialize)]
@@ -34,7 +37,7 @@ pub struct Device
 
 impl Device
 {
-	pub fn new(groups: Vec<Group>, network: Network, row: &PgRow) -> Device
+	pub fn new(row: &PgRow, groups: Vec<Group>, network: Network) -> Device
 	{
 		return Device {
 			id: row.get("id"),

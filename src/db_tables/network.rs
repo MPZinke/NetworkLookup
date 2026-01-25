@@ -12,6 +12,7 @@
 
 
 use serde::Serialize;
+use sqlx::{Row, postgres::PgRow};
 
 
 #[derive(Clone, Debug, Serialize)]
@@ -26,13 +27,13 @@ pub struct Network
 
 impl Network
 {
-	pub fn new(id: i32, label: String, gateway: String, netmask: String) -> Network
+	pub fn new(row: &PgRow) -> Network
 	{
 		return Network{
-			id: id,
-			label: label,
-			gateway: gateway,
-			netmask: netmask
+			id: row.get("id"),
+			label: row.get("label"),
+			gateway: row.get("gateway"),
+			netmask: row.get("netmask")
 		};
 	}
 }
