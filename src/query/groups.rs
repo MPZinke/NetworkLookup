@@ -33,23 +33,3 @@ pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
 	}
 	return Ok(groups);
 }
-
-
-pub async fn get_groups_by_device_id(pool: &PgPool, device_id: i32) -> Result<Vec<Group>, LookupError>
-{
-	let query_str: &str = r#"
-		SELECT "Groups".*
-		FROM "Groups-Devices"
-		JOIN "Groups" ON "Groups-Devices"."Groups.id" = "Groups"."id"
-		WHERE "Groups-Devices"."Devices.id" = $1;
-	"#;
-
-	let result: Vec<PgRow> = query(query_str).bind(device_id).fetch_all(pool).await?;
-
-	let mut groups: Vec<Group> = vec![];
-	for row in result
-	{
-		groups.push(row.get("label"));
-	}
-	return Ok(groups);
-}

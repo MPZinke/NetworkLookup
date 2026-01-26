@@ -11,6 +11,9 @@
 ***********************************************************************************************************************/
 
 
+CREATE TYPE NetworkType AS ENUM ('Asus', 'NetGear');
+
+
 -- SUMMARY:  List of Networkss that are tracked.
 DROP TABLE IF EXISTS "Networks" CASCADE;
 CREATE TABLE "Networks"
@@ -19,11 +22,12 @@ CREATE TABLE "Networks"
 	"label" VARCHAR(32) NOT NULL DEFAULT '' UNIQUE,
 	"credentials" TEXT DEFAULT NULL,
 	"gateway" VARCHAR(15) NOT NULL,
-	"netmask" VARCHAR(15) NOT NULL
+	"netmask" VARCHAR(15) NOT NULL,
+	"type" NetworkType DEFAULT NULL
 );
 
 
-CREATE TYPE Band AS ENUM ('2.4GHz', '5GHz', 'Ethernet');
+CREATE TYPE Band AS ENUM ('Ethernet', '2.4GHz', '5GHz', 'All');
 
 
 -- SUMMARY:  Devices Addresses for a Networks.
@@ -32,19 +36,18 @@ DROP TABLE IF EXISTS "Devices" CASCADE;
 CREATE TABLE "Devices"
 (
 	"id" SERIAL NOT NULL PRIMARY KEY,
-	"address" VARCHAR(15) DEFAULT NULL,
-	"band" Band DEFAULT NULL,
 	"label" VARCHAR(32) NOT NULL DEFAULT '',
-	"is_reservation" BOOL NOT NULL DEFAULT FALSE,
-	"is_static" BOOL NOT NULL DEFAULT FALSE,
-	"mac" CHAR(17) DEFAULT NULL,
+	"mac" CHAR(17) NOT NULL,
+	"static_ip_address" VARCHAR(15) DEFAULT NULL,
+	"band" Band DEFAULT NULL,
+	"is_reservation" BOOL NOT NULL DEFAULT FALSE,  -- Whether the entry is set to the actual device information.
 	"Networks.id" INT NOT NULL REFERENCES "Networks"("id") ON DELETE CASCADE,
 	UNIQUE("label", "Networks.id")
 );
 
 
-CREATE UNIQUE INDEX ON "Devices"("address", "Networks.id")
-	WHERE "address" IS NOT NULL;
+CREATE UNIQUE INDEX ON "Devices"("static_ip_address")
+	WHERE "static_ip_address" IS NOT NULL;
 
 
 CREATE UNIQUE INDEX ON "Devices"("mac", "Networks.id")

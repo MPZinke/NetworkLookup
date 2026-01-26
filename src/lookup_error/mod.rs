@@ -21,7 +21,7 @@ pub enum LookupError
 	InvalidHeader(reqwest::header::InvalidHeaderValue),
 	NotFound(std::io::Error),
 	Postgres(sqlx::error::Error),
-	Request(reqwest::Error)
+	Request(reqwest::Error),
 }
 
 
@@ -34,7 +34,7 @@ impl std::fmt::Display for LookupError
 			LookupError::InvalidHeader(error) => write!(format, "{}", error),
 			LookupError::NotFound(error) => write!(format, "{}", error),
 			LookupError::Postgres(error) => write!(format, "{}", error),
-			LookupError::Request(error) => write!(format, "{}", error)
+			LookupError::Request(error) => write!(format, "{}", error),
 		}
 	}
 }
@@ -74,12 +74,3 @@ impl From<reqwest::Error> for LookupError
 		LookupError::Request(err)
 	}
 }
-
-
-// ———————————————————————————————————————————————— HELPER FUNCTIONS ———————————————————————————————————————————————— //
-
-pub fn new_not_found_error(message: String) -> LookupError
-{
-	return LookupError::NotFound(std::io::Error::new(std::io::ErrorKind::NotFound, message));
-}
-

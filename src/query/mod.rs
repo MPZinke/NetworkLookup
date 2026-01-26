@@ -43,7 +43,6 @@ pub fn query_to_response<T: Serialize>(generic_query: Result<T, LookupError>) ->
 			let response: fn() -> HttpResponseBuilder = match(error)
 			{
 				LookupError::NotFound(_) => HttpResponse::NotFound,
-				// LookupError::Generic(_) => HttpResponse::InternalServerError,
 				LookupError::InvalidHeader(_) => HttpResponse::InternalServerError,
 				LookupError::Postgres(_) => HttpResponse::InternalServerError,
 				LookupError::Request(_) => HttpResponse::InternalServerError

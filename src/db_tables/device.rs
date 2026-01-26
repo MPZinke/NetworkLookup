@@ -11,11 +11,8 @@
 ***********************************************************************************************************************/
 
 
-use sqlx::{Row, postgres::PgRow};
 use serde::Serialize;
-
-
-use crate::db_tables::Network;
+use sqlx::{FromRow, Row, postgres::PgRow};
 
 
 pub type Group = String;
@@ -24,32 +21,33 @@ pub type Group = String;
 #[derive(Debug, Serialize)]
 pub struct Device
 {
-	pub id: Option<i32>,
-	pub address: Option<String>,
+	pub band: Option<String>,
+	pub id: i32,
+	pub is_reservation: bool,
 	pub label: String,
-	pub is_reservation: Option<bool>,
-	pub is_static: Option<bool>,
-	pub is_reachable: Option<bool>,
-	pub mac: Option<String>,
+	pub mac: String,
+	pub network_id: i32,
+	pub static_ip_address: Option<String>,
 	pub groups: Vec<Group>,
-	pub network: Network
 }
 
 
-impl Device
+// FROM: https://stackoverflow.com/a/78618913
+impl<'r> FromRow<'r, PgRow> for Device
 {
-	pub fn new(row: &PgRow, groups: Vec<Group>, network: Network) -> Device
-	{
-		return Device {
-			id: Some(row.get("id")),
-			address: row.get("address"),
-			label: row.get("label"),
-			is_reservation: Some(row.get("is_reservation")),
-			is_static: Some(row.get("is_static")),
-			is_reachable: None,
-			mac: row.get("mac"),
-			groups: groups,
-			network: network,
-		};
+    fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error>
+    {
+		Ok(
+			Device {
+				band: row.try_get::<Option<String>, &str>("band")?,
+				id: row.try_get::<i32, &str>("id")?,
+				is_reservation: row.try_get::<bool, &str>("is_reservation")?,
+				label: row.try_get::<String, &str>("label")?,
+				mac: row.try_get::<String, &str>("mac")?,
+				network_id: row.try_get::<i32, &str>("Networks.id")?,
+				static_ip_address: row.try_get::<Option<String>, &str>("static_ip_address")?,
+				groups: row.try_get::<String, &str>("groups")?.split(',').map(|s| s.to_string()).collect(),
+			}
+		)
 	}
 }
