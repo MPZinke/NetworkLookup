@@ -15,10 +15,29 @@ use serde::Serialize;
 use sqlx::FromRow;
 
 
-// pub enum NetworkTypes
-// {
-// 	Asus("Asus"),
-// 	NetGear("NetGear"),
+// #[macro_use] extern crate enum_str;
+
+
+// enum_str! {
+// 	NetworkType,
+// 	(Asus, "Asus"),
+// 	(NetGear, "NetGear"),
+// }
+pub enum NetworkType
+{
+	Asus,
+	NetGear,
+}
+
+
+// impl NetworkType {
+//     fn as_str(&self) -> &'static str
+//     {
+//         match self {
+//             NetworkType::Asus => "Asus",
+//             NetworkType::NetGear => "NetGear",
+//         }
+//     }
 // }
 
 
@@ -30,5 +49,5 @@ pub struct Network
 	pub label: String,
 	pub gateway: String,
 	pub netmask: String,
-	pub r#type: String,
+	pub r#type: Option<String>,
 }

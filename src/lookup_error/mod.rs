@@ -10,6 +10,8 @@
 *																													  *
 ***********************************************************************************************************************/
 
+use actix_web::{http::header::ContentType, HttpResponse, HttpResponseBuilder};
+
 
 // ——————————————————————————————————————————————————— ERROR ENUM ——————————————————————————————————————————————————— //
 
@@ -22,6 +24,23 @@ pub enum LookupError
 	NotFound(std::io::Error),
 	Postgres(sqlx::error::Error),
 	Request(reqwest::Error),
+}
+
+
+impl LookupError
+{
+	pub fn to_json_response(self) -> HttpResponse
+	{
+		let response: fn() -> HttpResponseBuilder = match(self)
+		{
+			LookupError::NotFound(_) => HttpResponse::NotFound,
+			LookupError::InvalidHeader(_) => HttpResponse::InternalServerError,
+			LookupError::Postgres(_) => HttpResponse::InternalServerError,
+			LookupError::Request(_) => HttpResponse::InternalServerError
+		};
+		let error_message: String = format!(r#"{{"error": "{}"}}"#, self);
+		return response().insert_header(ContentType::json()).body(error_message);
+	}
 }
 
 

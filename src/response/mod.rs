@@ -2,7 +2,7 @@
 /***********************************************************************************************************************
 *                                                                                                                      *
 *   created by: MPZinke                                                                                                *
-*   on 2026.01.24                                                                                                      *
+*   on 2026.01.27                                                                                                      *
 *                                                                                                                      *
 *   DESCRIPTION: TEMPLATE                                                                                              *
 *   BUGS:                                                                                                              *
@@ -11,33 +11,20 @@
 ***********************************************************************************************************************/
 
 
-use actix_web::web;
-use sqlx::postgres::PgPool;
-
-mod asus;
-mod device;
+use actix_web::{http::header::ContentType, HttpResponse};
+use serde_json;
+use serde::Serialize;
 
 
-use asus::get_devices;
-use crate::db_tables::Network;
-use crate::query::networks::get_network_by_id;
-
-
-pub use device::Device as Device;
-
-
-pub async fn lookup(pool: &web::Data<PgPool>, network_id: i32) -> Option<Vec<Device>>
+pub fn to_json_response<T: Serialize>(value: T) -> HttpResponse
 {
-	let network: Network = get_network_by_id(pool, network_id).await.ok()?;
-	let network_type: &String = match(&network.r#type)
+	return match(serde_json::to_string(&value))
 	{
-		Some(network_type) => network_type,
-		None => return None,
-	};
-
-	match(network_type.as_str())
-	{
-		"Asus" => return Some(get_devices(&network).await?),
-		&_ => return None,
+		Ok(json) => HttpResponse::Ok().insert_header(ContentType::json()).body(json),
+		Err(error) =>
+		{
+			let error_message: String = format!(r#"{{"error": "{}"}}"#, error);
+			return HttpResponse::InternalServerError().insert_header(ContentType::json()).body(error_message);
+		}
 	}
 }

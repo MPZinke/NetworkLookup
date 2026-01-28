@@ -21,7 +21,7 @@ use crate::lookup_error::LookupError;
 pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
 {
 	let query_str: &str = r#"
-		SELECT *, "type"::TEXT  -- FROM: https://stackoverflow.com/a/77971680
+		SELECT *, CASE WHEN "type" IS NULL THEN NULL ELSE "type"::TEXT END
 		FROM "Networks";
 	"#;
 	return Ok(query_as::<_, Network>(query_str).fetch_all(pool).await?);
@@ -31,7 +31,7 @@ pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
 pub async fn get_network_by_id(pool: &PgPool, id: i32) -> Result<Network, LookupError>
 {
 	let query_str: &str = r#"
-		SELECT *, "type"::TEXT  -- FROM: https://stackoverflow.com/a/77971680
+		SELECT *, CASE WHEN "type" IS NULL THEN NULL ELSE "type"::TEXT END
 		FROM "Networks"
 		WHERE "id" = $1;
 	"#;

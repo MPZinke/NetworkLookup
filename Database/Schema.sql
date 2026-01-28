@@ -36,12 +36,11 @@ DROP TABLE IF EXISTS "Devices" CASCADE;
 CREATE TABLE "Devices"
 (
 	"id" SERIAL NOT NULL PRIMARY KEY,
+	"band" Band DEFAULT NULL,
 	"label" VARCHAR(32) NOT NULL DEFAULT '',
 	"mac" CHAR(17) NOT NULL,
-	"static_ip_address" VARCHAR(15) DEFAULT NULL,
-	"band" Band DEFAULT NULL,
-	"is_reservation" BOOL NOT NULL DEFAULT FALSE,  -- Whether the entry is set to the actual device information.
 	"Networks.id" INT NOT NULL REFERENCES "Networks"("id") ON DELETE CASCADE,
+	"static_ip_address" VARCHAR(15) DEFAULT NULL,
 	UNIQUE("label", "Networks.id")
 );
 
