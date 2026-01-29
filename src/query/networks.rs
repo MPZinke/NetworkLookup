@@ -15,10 +15,10 @@ use sqlx::{query_as, PgPool};
 
 
 use crate::db_tables::Network;
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 
 
-pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
+pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT *, CASE WHEN "type" IS NULL THEN NULL ELSE "type"::TEXT END
@@ -28,7 +28,7 @@ pub async fn get_networks(pool: &PgPool) -> Result<Vec<Network>, LookupError>
 }
 
 
-pub async fn get_network_by_id(pool: &PgPool, id: i32) -> Result<Network, LookupError>
+pub async fn get_network_by_id(pool: &PgPool, id: i32) -> Result<Network, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT *, CASE WHEN "type" IS NULL THEN NULL ELSE "type"::TEXT END

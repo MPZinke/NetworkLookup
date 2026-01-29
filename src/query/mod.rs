@@ -22,7 +22,7 @@ use serde_json;
 use serde::Serialize;
 
 
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 
 
 /*
@@ -33,7 +33,7 @@ DETAILS: Unwraps the Result. If Result is Ok, then it attempts to convert the re
          is sent as a JSON.
 RETURNS: An HttpResponse with a value or error body.
 */
-pub fn query_to_response<T: Serialize>(generic_query: Result<T, LookupError>) -> HttpResponse
+pub fn query_to_response<T: Serialize>(generic_query: Result<T, ResponseError>) -> HttpResponse
 {
 	let response_generic: T = match(generic_query)
 	{
@@ -42,10 +42,10 @@ pub fn query_to_response<T: Serialize>(generic_query: Result<T, LookupError>) ->
 		{
 			let response: fn() -> HttpResponseBuilder = match(error)
 			{
-				LookupError::NotFound(_) => HttpResponse::NotFound,
-				LookupError::InvalidHeader(_) => HttpResponse::InternalServerError,
-				LookupError::Postgres(_) => HttpResponse::InternalServerError,
-				LookupError::Request(_) => HttpResponse::InternalServerError
+				ResponseError::NotFound(_) => HttpResponse::NotFound,
+				ResponseError::InvalidHeader(_) => HttpResponse::InternalServerError,
+				ResponseError::Postgres(_) => HttpResponse::InternalServerError,
+				ResponseError::Request(_) => HttpResponse::InternalServerError
 			};
 			let error_message: String = format!(r#"{{"error": "{}"}}"#, error);
 			return response().insert_header(ContentType::json()).body(error_message);

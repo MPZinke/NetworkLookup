@@ -24,6 +24,7 @@ use crate::query::networks::get_network_by_id;
 
 
 pub use device::Device as Device;
+pub use device::ToDeviceVector as ToDeviceVector;
 
 
 pub async fn lookup(pool: &web::Data<PgPool>, network_id: i32) -> Option<Vec<Device>>

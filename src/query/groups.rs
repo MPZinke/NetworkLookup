@@ -15,10 +15,10 @@ use sqlx::{query, PgPool, Row, postgres::PgRow};
 
 
 use crate::db_tables::Group;
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 
 
-pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, LookupError>
+pub async fn get_groups(pool: &PgPool) -> Result<Vec<Group>, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT *

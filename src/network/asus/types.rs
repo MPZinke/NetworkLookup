@@ -62,36 +62,6 @@ impl From<AsusDevice> for Device
 }
 
 
-impl AsusDevice
-{
-	pub fn to_device(self, network_id: i32) -> Device
-	{
-		let label: String;
-		if(self.nickName.len() > 0)
-		{
-			label = self.nickName;
-		}
-		else
-		{
-			label = self.name;
-		}
-		return Device {
-			// Network and DB
-			label: label,
-			mac: self.mac,
-			// Network
-			ip_address: Some(self.ip),
-			// DB
-			id: None,
-			band: None,
-			groups: None,
-			network_id: network_id,
-			static_ip_address: None,
-		};
-	}
-}
-
-
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(untagged)]  // FROM: https://github.com/serde-rs/serde/issues/1386#issuecomment-759540656
 pub enum NetworkMapValue

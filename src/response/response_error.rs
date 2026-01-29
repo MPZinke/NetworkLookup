@@ -18,7 +18,7 @@ use actix_web::{http::header::ContentType, HttpResponse, HttpResponseBuilder};
 // FROM: https://fettblog.eu/rust-enums-wrapping-errors/
 //  AND: https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/wrap_error.html
 #[derive(Debug)]
-pub enum LookupError
+pub enum ResponseError
 {
 	InvalidHeader(reqwest::header::InvalidHeaderValue),
 	NotFound(std::io::Error),
@@ -27,16 +27,16 @@ pub enum LookupError
 }
 
 
-impl LookupError
+impl ResponseError
 {
 	pub fn to_json_response(self) -> HttpResponse
 	{
 		let response: fn() -> HttpResponseBuilder = match(self)
 		{
-			LookupError::NotFound(_) => HttpResponse::NotFound,
-			LookupError::InvalidHeader(_) => HttpResponse::InternalServerError,
-			LookupError::Postgres(_) => HttpResponse::InternalServerError,
-			LookupError::Request(_) => HttpResponse::InternalServerError
+			ResponseError::NotFound(_) => HttpResponse::NotFound,
+			ResponseError::InvalidHeader(_) => HttpResponse::InternalServerError,
+			ResponseError::Postgres(_) => HttpResponse::InternalServerError,
+			ResponseError::Request(_) => HttpResponse::InternalServerError
 		};
 		let error_message: String = format!(r#"{{"error": "{}"}}"#, self);
 		return response().insert_header(ContentType::json()).body(error_message);
@@ -44,52 +44,52 @@ impl LookupError
 }
 
 
-impl std::fmt::Display for LookupError
+impl std::fmt::Display for ResponseError
 {
 	fn fmt(&self, format: &mut std::fmt::Formatter) -> std::fmt::Result
 	{
 		match(self)
 		{
-			LookupError::InvalidHeader(error) => write!(format, "{}", error),
-			LookupError::NotFound(error) => write!(format, "{}", error),
-			LookupError::Postgres(error) => write!(format, "{}", error),
-			LookupError::Request(error) => write!(format, "{}", error),
+			ResponseError::InvalidHeader(error) => write!(format, "{}", error),
+			ResponseError::NotFound(error) => write!(format, "{}", error),
+			ResponseError::Postgres(error) => write!(format, "{}", error),
+			ResponseError::Request(error) => write!(format, "{}", error),
 		}
 	}
 }
 
 
-impl From<reqwest::header::InvalidHeaderValue> for LookupError
+impl From<reqwest::header::InvalidHeaderValue> for ResponseError
 {
 	fn from(err: reqwest::header::InvalidHeaderValue) -> Self
 	{
-		LookupError::InvalidHeader(err)
+		ResponseError::InvalidHeader(err)
 	}
 }
 
 
-impl From<std::io::Error> for LookupError
+impl From<std::io::Error> for ResponseError
 {
 	fn from(err: std::io::Error) -> Self
 	{
-		LookupError::NotFound(err)
+		ResponseError::NotFound(err)
 	}
 }
 
 
-impl From<sqlx::error::Error> for LookupError
+impl From<sqlx::error::Error> for ResponseError
 {
 	fn from(err: sqlx::error::Error) -> Self
 	{
-		LookupError::Postgres(err)
+		ResponseError::Postgres(err)
 	}
 }
 
 
-impl From<reqwest::Error> for LookupError
+impl From<reqwest::Error> for ResponseError
 {
 	fn from(err: reqwest::Error) -> Self
 	{
-		LookupError::Request(err)
+		ResponseError::Request(err)
 	}
 }

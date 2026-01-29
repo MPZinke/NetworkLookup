@@ -15,10 +15,10 @@ use sqlx::{query_as, PgPool};
 
 
 use crate::db_tables::Service;
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 
 
-pub async fn get_services(pool: &PgPool) -> Result<Vec<Service>, LookupError>
+pub async fn get_services(pool: &PgPool) -> Result<Vec<Service>, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT
@@ -45,7 +45,7 @@ pub async fn get_services(pool: &PgPool) -> Result<Vec<Service>, LookupError>
 }
 
 
-pub async fn get_service_by_id(pool: &PgPool, id: i32) -> Result<Service, LookupError>
+pub async fn get_service_by_id(pool: &PgPool, id: i32) -> Result<Service, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT

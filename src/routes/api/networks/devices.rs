@@ -16,9 +16,9 @@ use sqlx::postgres::PgPool;
 
 
 use crate::db_tables::DBDevice;
-use crate::lookup_error::LookupError;
-use crate::network::{lookup, Device};
-use crate::response::to_json_response;
+use crate::response::ResponseError;
+use crate::network::{lookup, Device, ToDeviceVector};
+use crate::response::ToJsonResponse;
 use crate::query::query_to_response;
 use crate::query::devices::{get_devices_by_network_id, get_device_by_network_id_and_device_id};
 
@@ -33,13 +33,32 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 		Err(error) => return error.to_json_response(),
 	};
 
-	let devices = match(lookup(&pool, id).await)
+	let mut network_devices: Vec<Device> = match(lookup(&pool, id).await)
 	{
-		Some(devices) => devices,
-		None => return to_json_response(db_devices.into_iter().map(|db_device: DBDevice| db_device.to_device()).collect::<Vec<Device>>()),
+		Some(network_devices) => network_devices,
+		None => return db_devices.to::<Device>().to_json_response(),
 	};
 
-	return to_json_response(db_devices);
+	let mut devices: Vec<Device> = vec![];
+	for db_device in db_devices
+	{
+		match(network_devices.iter().position(|network_device|{network_device.eq(&db_device)}))
+		{
+			None => devices.push(db_device.into()),
+			Some(network_device_index)
+			=>
+			{
+				let mut device = network_devices.remove(network_device_index);
+				device.join(db_device);
+				devices.push(device);
+			},
+		}
+		// match(network_devices.iter_mut().find_map(|device| {device.eq(&db_device).then_some(device)}))
+	}
+
+	devices.append(&mut network_devices);
+
+	return devices.to_json_response();
 }
 
 
@@ -47,7 +66,7 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 pub async fn id(path: Path<(i32, i32)>, pool: Data<PgPool>) -> HttpResponse
 {
 	let (network_id, device_id) = path.into_inner();
-	let query_response: Result<DBDevice, LookupError> = get_device_by_network_id_and_device_id(
+	let query_response: Result<DBDevice, ResponseError> = get_device_by_network_id_and_device_id(
 		pool.as_ref(),
 		network_id,
 		device_id

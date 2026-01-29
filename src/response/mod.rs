@@ -16,15 +16,31 @@ use serde_json;
 use serde::Serialize;
 
 
-pub fn to_json_response<T: Serialize>(value: T) -> HttpResponse
+mod response_error;
+
+
+pub use response_error::ResponseError as ResponseError;
+
+
+pub trait ToJsonResponse
 {
-	return match(serde_json::to_string(&value))
+	fn to_json_response(self) -> HttpResponse;
+}
+
+
+impl<T> ToJsonResponse for std::vec::Vec<T>
+where T: Serialize,
+{
+	fn to_json_response(self) -> HttpResponse
 	{
-		Ok(json) => HttpResponse::Ok().insert_header(ContentType::json()).body(json),
-		Err(error) =>
+		return match(serde_json::to_string(&self))
 		{
-			let error_message: String = format!(r#"{{"error": "{}"}}"#, error);
-			return HttpResponse::InternalServerError().insert_header(ContentType::json()).body(error_message);
+			Ok(json) => HttpResponse::Ok().insert_header(ContentType::json()).body(json),
+			Err(error) =>
+			{
+				let error_message: String = format!(r#"{{"error": "{}"}}"#, error);
+				return HttpResponse::InternalServerError().insert_header(ContentType::json()).body(error_message);
+			}
 		}
 	}
 }

@@ -17,6 +17,21 @@ use serde::{Deserialize, Serialize};
 use crate::db_tables::{DBDevice, Group};
 
 
+// FROM: https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html
+#[derive(Debug)]
+pub struct DeviceJoinError;
+#[derive(Debug)]
+pub struct MismatchedMACError;
+
+
+impl std::fmt::Display for DeviceJoinError {
+	fn fmt(&self, format: &mut std::fmt::Formatter) -> std::fmt::Result
+	{
+		write!(format, "Failed to join DBDevice and Device.")
+	}
+}
+
+
 #[derive(Deserialize, Serialize)]
 pub struct Device
 {
@@ -34,55 +49,39 @@ pub struct Device
 }
 
 
-impl From<DBDevice> for Device
+pub trait ToDeviceVector
 {
-	fn from(db_device: DBDevice) -> Device
-	{
-		return Device {
-			// Network and DB
-			label: db_device.label,
-			mac: db_device.mac,
-			// Network
-			ip_address: None,
-			// DB
-			id: Some(db_device.id),
-			band: db_device.band,
-			groups: Some(db_device.groups),
-			network_id: db_device.network_id,
-			static_ip_address: db_device.static_ip_address,
-		};
-	}
+	type Item;
+
+	fn to<U>(self, ) -> Vec<U>
+	where U: From<Self::Item>;
 }
 
 
-// FROM: https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html
-#[derive(Debug)]
-struct DeviceJoinError;
-#[derive(Debug)]
-struct MismatchedMACError;
+impl<T> ToDeviceVector for Vec<T> {
+	type Item = T;
 
-
-impl std::fmt::Display for DeviceJoinError {
-	fn fmt(&self, format: &mut std::fmt::Formatter) -> std::fmt::Result
+	fn to<U>(self) -> Vec<U>
+	where U: From<T>,
 	{
-		write!(format, "Failed to join DBDevice and Device.")
+		self.into_iter().map(U::from).collect()
 	}
 }
 
 
 impl Device
 {
-	fn eq(self, right: &DBDevice) -> bool
+	pub fn eq(&self, right: &DBDevice) -> bool
 	{
 		return self.mac == right.mac;
 	}
 
 
-	fn join(mut self, right: DBDevice) -> Result<(), DeviceJoinError>
+	pub fn join(&mut self, right: DBDevice) -> ()
 	{
 		if(self.mac != right.mac)
 		{
-			return Err(DeviceJoinError);
+			return panic!("MAC {} != MAC {}", self.mac, right.mac);
 		}
 
 		self.label = right.label;
@@ -91,7 +90,5 @@ impl Device
 		self.groups = Some(right.groups);
 		self.network_id = right.network_id;
 		self.static_ip_address = right.static_ip_address;
-
-		Ok(())
 	}
 }

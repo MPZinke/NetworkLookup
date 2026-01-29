@@ -15,14 +15,14 @@ use sqlx::{query_as, PgPool};
 
 
 use crate::db_tables::DBDevice;
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 
 
 pub async fn get_device_by_network_id_and_device_id(
 	pool: &PgPool,
 	network_id: i32,
 	device_id: i32
-) -> Result<DBDevice, LookupError>
+) -> Result<DBDevice, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT
@@ -48,7 +48,7 @@ pub async fn get_device_by_network_id_and_device_id(
 pub async fn get_devices_by_network_id(
 	pool: &PgPool,
 	network_id: i32
-) -> Result<Vec<DBDevice>, LookupError>
+) -> Result<Vec<DBDevice>, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT
@@ -74,7 +74,7 @@ pub async fn get_devices_by_network_id(
 pub async fn get_devices_by_group_label(
 	pool: &PgPool,
 	group_label: String
-) -> Result<Vec<DBDevice>, LookupError>
+) -> Result<Vec<DBDevice>, ResponseError>
 {
 	let query_str: &str = r#"
 		SELECT

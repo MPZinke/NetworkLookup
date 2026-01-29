@@ -16,14 +16,14 @@ use sqlx::postgres::PgPool;
 
 
 use crate::db_tables::{DBDevice, Group};
-use crate::lookup_error::LookupError;
+use crate::response::ResponseError;
 use crate::query::{query_to_response, devices::get_devices_by_group_label, groups::get_groups};
 
 
 // `/api/groups`
 pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 {
-	let query_response: Result<Vec<Group>, LookupError> = get_groups(pool.as_ref()).await;
+	let query_response: Result<Vec<Group>, ResponseError> = get_groups(pool.as_ref()).await;
 	return query_to_response(query_response);
 }
 
@@ -32,6 +32,6 @@ pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 pub async fn label(path: web::Path<String>, pool: web::Data<PgPool>) -> HttpResponse
 {
 	let label = path.into_inner();
-	let query_response: Result<Vec<DBDevice>, LookupError> = get_devices_by_group_label(pool.as_ref(), label).await;
+	let query_response: Result<Vec<DBDevice>, ResponseError> = get_devices_by_group_label(pool.as_ref(), label).await;
 	return query_to_response(query_response);
 }

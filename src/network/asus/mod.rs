@@ -15,7 +15,7 @@ use reqwest::{Client, Response};
 
 
 use crate::db_tables::Network;
-use crate::network::Device;
+use crate::network::{Device, ToDeviceVector};
 
 
 mod types;
@@ -102,5 +102,5 @@ pub async fn get_devices(network: &Network) -> Option<Vec<Device>>
 	let raw_data: String = get_raw_data(network).await?;
 	let asus_devices: Vec<AsusDevice> = parse_raw_data(raw_data)?;
 
-	return Some(asus_devices.into_iter().map(|asus_device: AsusDevice| asus_device.to_device(network.id)).collect());
+	return Some(asus_devices.to());
 }

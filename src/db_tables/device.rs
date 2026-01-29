@@ -15,14 +15,14 @@ use serde::Serialize;
 use sqlx::{FromRow, Row, postgres::PgRow};
 
 
-use crate::network::Device;
+use crate::network::Device as NetworkDevice;
 
 
 pub type Group = String;
 
 
 #[derive(Debug, Serialize)]
-pub struct DBDevice
+pub struct Device
 {
 	// Network and DB
 	pub label: String,
@@ -37,12 +37,12 @@ pub struct DBDevice
 
 
 // FROM: https://stackoverflow.com/a/78618913
-impl<'r> FromRow<'r, PgRow> for DBDevice
+impl<'r> FromRow<'r, PgRow> for Device
 {
     fn from_row(row: &'r PgRow) -> Result<Self, sqlx::Error>
     {
 		Ok(
-			DBDevice {
+			Device {
 				// Network and DB
 				label: row.try_get::<String, &str>("label")?,
 				mac: row.try_get::<String, &str>("mac")?,
@@ -58,22 +58,22 @@ impl<'r> FromRow<'r, PgRow> for DBDevice
 }
 
 
-impl DBDevice
+impl From<Device> for NetworkDevice
 {
-	pub fn to_device(self) -> Device
+	fn from(db_device: Device) -> NetworkDevice
 	{
-		return Device {
+		return NetworkDevice {
 			// Network and DB
-			label: self.label,
-			mac: self.mac,
+			label: db_device.label,
+			mac: db_device.mac,
 			// Network
 			ip_address: None,
 			// DB
-			id: Some(self.id),
-			band: self.band,
-			groups: Some(self.groups),
-			network_id: self.network_id,
-			static_ip_address: self.static_ip_address,
+			id: Some(db_device.id),
+			band: db_device.band,
+			groups: Some(db_device.groups),
+			network_id: db_device.network_id,
+			static_ip_address: db_device.static_ip_address,
 		};
 	}
 }
