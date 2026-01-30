@@ -17,27 +17,46 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 
-pub type WiredClient = HashMap<String, Vec<String>>;
-pub type WirelessClient = HashMap<String, WirelessBands>;
-
-
-#[derive(Clone, Deserialize, Serialize)]
-pub struct WirelessBands
+pub type MacAddresses = Vec<String>;
+pub type Interface<T> = HashMap<String, T>;
+pub struct InterfacesMacAddresses
 {
-	#[serde(rename = "2G")]
-	pub _2g: Vec<String>,
-	#[serde(rename = "5G")]
-	pub _5g: Vec<String>,
+	pub _2ghz_mac_addresses: MacAddresses,
+	pub _5ghz_mac_addresses: MacAddresses,
+	pub _ethernet_mac_addresses: MacAddresses,
 }
 
 
-impl WirelessBands
+impl InterfacesMacAddresses
 {
-	pub fn new() -> WirelessBands
+	pub fn new() -> InterfacesMacAddresses
 	{
-		return WirelessBands {
-			_2g: vec![],
-			_5g: vec![],
+		return InterfacesMacAddresses {
+			_2ghz_mac_addresses: vec![],
+			_5ghz_mac_addresses: vec![],
+			_ethernet_mac_addresses: vec![],
+		}
+	}
+}
+
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct WirelessMacAddresses
+{
+	#[serde(rename = "2G")]
+	pub _2ghz_mac_addresses: MacAddresses,
+	#[serde(rename = "5G")]
+	pub _5ghz_mac_addresses: MacAddresses,
+}
+
+
+impl Default for WirelessMacAddresses
+{
+	fn default() -> Self
+	{
+		return WirelessMacAddresses {
+			_2ghz_mac_addresses: vec![],
+			_5ghz_mac_addresses: vec![],
 		}
 	}
 }

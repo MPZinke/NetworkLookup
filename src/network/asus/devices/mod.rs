@@ -18,13 +18,15 @@ use crate::db_tables::Network;
 use crate::network::{Device, ToDeviceVector};
 
 
+mod band;
 mod types;
 
 
-pub use types::{AsusDevice, NetworkMap, NetworkMapValue};
+use band::add_devices_bands;
+use types::device::{AsusDevice, NetworkMap, NetworkMapValue};
 
 
-async fn get_devices_raw_data(asus_token: String, network_gateway: &String) -> Option<String>
+async fn get_devices_raw_data(asus_token: &String, network_gateway: &String) -> Option<String>
 {
 	let client = Client::new();
 	let response: Response = client
@@ -68,16 +70,18 @@ fn parse_devices_raw_data(raw_data: String) -> Option<Vec<AsusDevice>>
 }
 
 
-pub async fn get_bandless_devices(asus_token: String, network: &Network) -> Option<Vec<Device>>
+pub async fn get_devices(asus_token: &String, network: &Network) -> Option<Vec<Device>>
 {
 	let device_raw_data: String = get_devices_raw_data(asus_token, &network.gateway).await?;
 	let asus_devices: Vec<AsusDevice> = parse_devices_raw_data(device_raw_data)?;
 
-	let mut network_devices = asus_devices.to_device_vec();
-	for network_device in network_devices.iter_mut()
+	let mut devices = asus_devices.to_device_vec();
+	for device in devices.iter_mut()
 	{
-		network_device.network_id = network.id;
+		device.network_id = network.id;
 	}
 
-	return Some(network_devices);
+	add_devices_bands(asus_token, &network.gateway, &mut devices).await;
+
+	return Some(devices);
 }

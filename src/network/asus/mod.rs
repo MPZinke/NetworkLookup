@@ -18,11 +18,10 @@ use crate::db_tables::Network;
 use crate::network::{Device, ToDeviceVector};
 
 
-mod band;
 mod devices;
 
 
-use devices::{get_bandless_devices, AsusDevice, NetworkMap, NetworkMapValue};
+use devices::get_devices;
 
 
 async fn get_asus_token(network: &Network) -> Option<String>
@@ -53,6 +52,5 @@ pub async fn get_network_devices(network: &Network) -> Option<Vec<Device>>
 	}
 
 	let asus_token: String = get_asus_token(network).await?;
-	let bandless_devices: Option<Vec<Device>> = get_bandless_devices(asus_token, network).await;
-	return bandless_devices;
+	return get_devices(&asus_token, network).await;
 }
