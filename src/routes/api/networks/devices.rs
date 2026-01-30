@@ -36,7 +36,7 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 	let mut network_devices: Vec<Device> = match(lookup(&pool, id).await)
 	{
 		Some(network_devices) => network_devices,
-		None => return db_devices.to::<Device>().to_json_response(),
+		None => return db_devices.to_device_vec().to_json_response(),
 	};
 
 	let mut devices: Vec<Device> = vec![];

@@ -2,7 +2,7 @@
 /***********************************************************************************************************************
 *                                                                                                                      *
 *   created by: MPZinke                                                                                                *
-*   on 2026.01.26                                                                                                      *
+*   on 2026.01.29                                                                                                      *
 *                                                                                                                      *
 *   DESCRIPTION: TEMPLATE                                                                                              *
 *   BUGS:                                                                                                              *
@@ -10,66 +10,34 @@
 *                                                                                                                      *
 ***********************************************************************************************************************/
 
+
 use std::collections::HashMap;
 
 
 use serde::{Deserialize, Serialize};
 
 
-use crate::network::Device;
-
-
-pub type AsusToken = String;
+pub type WiredClient = HashMap<String, Vec<String>>;
+pub type WirelessClient = HashMap<String, WirelessBands>;
 
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct AsusDevice
+pub struct WirelessBands
 {
-	pub name: String,
-	pub nickName: String,
-	pub ip: String,
-	pub mac: String,
+	#[serde(rename = "2G")]
+	pub _2g: Vec<String>,
+	#[serde(rename = "5G")]
+	pub _5g: Vec<String>,
 }
 
 
-impl From<AsusDevice> for Device
+impl WirelessBands
 {
-	fn from(asus_device: AsusDevice) -> Device
+	pub fn new() -> WirelessBands
 	{
-		let label: String;
-		if(asus_device.nickName.len() > 0)
-		{
-			label = asus_device.nickName;
+		return WirelessBands {
+			_2g: vec![],
+			_5g: vec![],
 		}
-		else
-		{
-			label = asus_device.name;
-		}
-		return Device {
-			// Network and DB
-			label: label,
-			mac: asus_device.mac,
-			// Network
-			ip_address: Some(asus_device.ip),
-			// DB
-			id: None,
-			band: None,
-			network_id: -1,
-			static_ip_address: None,
-			groups: None,
-		};
 	}
 }
-
-
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(untagged)]  // FROM: https://github.com/serde-rs/serde/issues/1386#issuecomment-759540656
-pub enum NetworkMapValue
-{
-	AsusDevice(AsusDevice),
-	MacList(Vec<String>),
-	ClientAPILevel(String),
-}
-
-
-pub type NetworkMap = HashMap<String, NetworkMapValue>;

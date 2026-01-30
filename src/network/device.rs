@@ -39,32 +39,28 @@ pub struct Device
 	pub label: String,
 	pub mac: String,
 	// Network
+	pub network_id: i32,
 	pub ip_address: Option<String>,
 	// DB
 	pub id: Option<i32>,
 	pub band: Option<String>,
 	pub groups: Option<Vec<Group>>,
-	pub network_id: i32,
 	pub static_ip_address: Option<String>,
 }
 
 
 pub trait ToDeviceVector
 {
-	type Item;
-
-	fn to<U>(self, ) -> Vec<U>
-	where U: From<Self::Item>;
+	fn to_device_vec(self) -> Vec<Device>;
 }
 
 
-impl<T> ToDeviceVector for Vec<T> {
-	type Item = T;
-
-	fn to<U>(self) -> Vec<U>
-	where U: From<T>,
+impl<T> ToDeviceVector for Vec<T>
+where T: From<T>, Device: std::convert::From<T>
+{
+	fn to_device_vec(self) -> Vec<Device>
 	{
-		self.into_iter().map(U::from).collect()
+		self.into_iter().map(Device::from).collect()
 	}
 }
 
@@ -81,7 +77,7 @@ impl Device
 	{
 		if(self.mac != right.mac)
 		{
-			return panic!("MAC {} != MAC {}", self.mac, right.mac);
+			panic!("MAC {} != MAC {}", self.mac, right.mac);
 		}
 
 		self.label = right.label;
