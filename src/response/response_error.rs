@@ -10,7 +10,8 @@
 *																													  *
 ***********************************************************************************************************************/
 
-use actix_web::{http::header::ContentType, HttpResponse, HttpResponseBuilder};
+
+use serde::ser::{Serialize, Serializer, SerializeMap};
 
 
 // ——————————————————————————————————————————————————— ERROR ENUM ——————————————————————————————————————————————————— //
@@ -27,19 +28,14 @@ pub enum ResponseError
 }
 
 
-impl ResponseError
+impl Serialize for ResponseError
 {
-	pub fn to_json_response(self) -> HttpResponse
+	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+	where S: Serializer,
 	{
-		let response: fn() -> HttpResponseBuilder = match(self)
-		{
-			ResponseError::NotFound(_) => HttpResponse::NotFound,
-			ResponseError::InvalidHeader(_) => HttpResponse::InternalServerError,
-			ResponseError::Postgres(_) => HttpResponse::InternalServerError,
-			ResponseError::Request(_) => HttpResponse::InternalServerError
-		};
-		let error_message: String = format!(r#"{{"error": "{}"}}"#, self);
-		return response().insert_header(ContentType::json()).body(error_message);
+		let mut map = serializer.serialize_map(Some(1))?;
+		map.serialize_entry("error", &format!("{}", self))?;
+		return map.end();
 	}
 }
 

@@ -20,6 +20,7 @@ use sqlx::postgres::PgPool;
 
 use crate::db_tables::Network;
 use crate::response::ResponseError;
+use crate::response::ToJsonResponse;
 use crate::query::{query_to_response, networks::{get_networks, get_network_by_id}};
 
 
@@ -27,7 +28,7 @@ use crate::query::{query_to_response, networks::{get_networks, get_network_by_id
 pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 {
 	let query_response: Result<Vec<Network>, ResponseError> = get_networks(pool.as_ref()).await;
-	return query_to_response(query_response);
+	return query_response.to_json_response();
 }
 
 

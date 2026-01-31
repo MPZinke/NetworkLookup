@@ -16,10 +16,8 @@ use sqlx::postgres::PgPool;
 
 
 use crate::db_tables::DBDevice;
-use crate::response::ResponseError;
 use crate::network::{lookup, Device, ToDeviceVector};
 use crate::response::ToJsonResponse;
-use crate::query::query_to_response;
 use crate::query::devices::{get_devices_by_network_id, get_device_by_network_id_and_device_id};
 
 
@@ -42,7 +40,7 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 	let mut devices: Vec<Device> = vec![];
 	for db_device in db_devices
 	{
-		match(network_devices.iter().position(|network_device|{network_device.eq(&db_device)}))
+		match(network_devices.iter().position(|network_device|{network_device == &db_device}))
 		{
 			None => devices.push(db_device.into()),
 			Some(network_device_index)
@@ -53,7 +51,6 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 				devices.push(device);
 			},
 		}
-		// match(network_devices.iter_mut().find_map(|device| {device.eq(&db_device).then_some(device)}))
 	}
 
 	devices.append(&mut network_devices);
@@ -66,10 +63,24 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 pub async fn id(path: Path<(i32, i32)>, pool: Data<PgPool>) -> HttpResponse
 {
 	let (network_id, device_id) = path.into_inner();
-	let query_response: Result<DBDevice, ResponseError> = get_device_by_network_id_and_device_id(
-		pool.as_ref(),
-		network_id,
-		device_id
-	).await;
-	return query_to_response(query_response);
+	let db_device: DBDevice = match(
+		get_device_by_network_id_and_device_id(pool.as_ref(), network_id, device_id).await
+	)
+	{
+		Ok(db_device) => db_device,
+		Err(error) => return error.to_json_response(),
+	};
+
+	let mut network_devices: Vec<Device> = match(lookup(&pool, network_id).await)
+	{
+		Some(network_devices) => network_devices,
+		None => return Device::from(db_device).to_json_response(),
+	};
+
+	let mut device: Device = match(network_devices.iter().position(|network_device|{network_device == &db_device}))
+	{
+		Some(network_device_index) => network_devices.remove(network_device_index),
+		None => return Into::<Device>::into(db_device).to_json_response(),
+	};
+	return device.join(db_device).to_json_response();
 }

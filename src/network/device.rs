@@ -50,15 +50,18 @@ where T: From<T>, Device: std::convert::From<T>
 }
 
 
-impl Device
+impl PartialEq<DBDevice> for Device
 {
-	pub fn eq(&self, right: &DBDevice) -> bool
+	fn eq(&self, right: &DBDevice) -> bool
 	{
 		return self.mac == right.mac;
 	}
+}
 
 
-	pub fn join(&mut self, right: DBDevice) -> ()
+impl Device
+{
+	pub fn join(&mut self, right: DBDevice) -> &Self
 	{
 		if(self.mac != right.mac)
 		{
@@ -71,5 +74,7 @@ impl Device
 		self.groups = Some(right.groups);
 		self.network_id = right.network_id;
 		self.static_ip_address = right.static_ip_address;
+
+		return self;
 	}
 }

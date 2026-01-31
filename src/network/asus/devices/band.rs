@@ -65,12 +65,16 @@ fn parse_devices_bands_raw_data(raw_data: String) -> InterfacesMacAddresses
 }
 
 
-// TODO: Rename
-fn add(devices: &mut Vec<Device>, interfaces_mac_addresses: InterfacesMacAddresses) -> ()
+fn add_bands_for_interfaces(devices: &mut Vec<Device>, interfaces_mac_addresses: InterfacesMacAddresses) -> ()
 {
+	let some_all = Some("All".to_string());
 	for device in &mut *devices
 	{
-		if(interfaces_mac_addresses._2ghz_mac_addresses.contains(&device.mac))
+		if(device.band == some_all)
+		{
+			continue;
+		}
+		else if(interfaces_mac_addresses._2ghz_mac_addresses.contains(&device.mac))
 		{
 			device.band = Some(String::from("2.4GHz"));
 		}
@@ -103,11 +107,13 @@ where T: for<'a> Deserialize<'a>
 }
 
 
-pub async fn add_devices_bands(asus_token: &String, network_gateway: &String, devices: &mut Vec<Device>) -> Option<()>
+pub async fn add_devices_bands(asus_token: &String, network_gateway: &String, devices: &mut Vec<Device>) -> ()
 {
-	let raw_data: String = get_devices_bands_raw_data(asus_token, network_gateway).await?;
+	let raw_data: String = match(get_devices_bands_raw_data(asus_token, network_gateway).await)
+	{
+		Some(raw_data) => raw_data,
+		None => return,
+	};
 	let interfaces_mac_addresses: InterfacesMacAddresses = parse_devices_bands_raw_data(raw_data);
-	add(devices, interfaces_mac_addresses);
-
-	None
+	add_bands_for_interfaces(devices, interfaces_mac_addresses);
 }
