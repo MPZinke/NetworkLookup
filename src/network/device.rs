@@ -17,21 +17,6 @@ use serde::{Deserialize, Serialize};
 use crate::db_tables::{DBDevice, Group};
 
 
-// FROM: https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html
-#[derive(Debug)]
-pub struct DeviceJoinError;
-#[derive(Debug)]
-pub struct MismatchedMACError;
-
-
-impl std::fmt::Display for DeviceJoinError {
-	fn fmt(&self, format: &mut std::fmt::Formatter) -> std::fmt::Result
-	{
-		write!(format, "Failed to join DBDevice and Device.")
-	}
-}
-
-
 #[derive(Deserialize, Serialize)]
 pub struct Device
 {

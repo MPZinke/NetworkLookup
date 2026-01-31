@@ -50,10 +50,10 @@ fn parse_devices_raw_data(raw_data: String) -> Option<Vec<AsusDevice>>
 
 	// FROM: https://doc.rust-lang.org/std/string/struct.String.html#method.strip_suffix
 	let json = line.strip_prefix("fromNetworkmapd : [")?.strip_suffix("],")?;
-	let fromNetworkmapd: NetworkMap = serde_json::from_str::<NetworkMap>(json).ok()?;
+	let network_map: NetworkMap = serde_json::from_str::<NetworkMap>(json).ok()?;
 
 	return Some(
-		fromNetworkmapd
+		network_map
 		.into_values()
 		.filter_map(
 			|value: NetworkMapValue|

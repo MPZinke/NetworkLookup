@@ -11,11 +11,11 @@
 ***********************************************************************************************************************/
 
 
-use reqwest::{Client, Response};
+use reqwest::Client;
 
 
 use crate::db_tables::Network;
-use crate::network::{Device, ToDeviceVector};
+use crate::network::Device;
 
 
 mod devices;

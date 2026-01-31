@@ -20,6 +20,7 @@ use serde::{Deserialize, Serialize};
 use crate::network::Device;
 
 
+#[allow(non_snake_case)]
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AsusDevice
 {

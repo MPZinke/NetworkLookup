@@ -11,14 +11,10 @@
 ***********************************************************************************************************************/
 
 
-use std::collections::HashMap;
-
-
 use reqwest::{Client, Response};
 use serde::Deserialize;
 
 
-use crate::db_tables::Network;
 use crate::network::Device;
 
 
@@ -72,7 +68,7 @@ fn parse_devices_bands_raw_data(raw_data: String) -> InterfacesMacAddresses
 // TODO: Rename
 fn add(devices: &mut Vec<Device>, interfaces_mac_addresses: InterfacesMacAddresses) -> ()
 {
-	for mut device in &mut *devices
+	for device in &mut *devices
 	{
 		if(interfaces_mac_addresses._2ghz_mac_addresses.contains(&device.mac))
 		{

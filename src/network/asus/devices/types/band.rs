@@ -27,19 +27,6 @@ pub struct InterfacesMacAddresses
 }
 
 
-impl InterfacesMacAddresses
-{
-	pub fn new() -> InterfacesMacAddresses
-	{
-		return InterfacesMacAddresses {
-			_2ghz_mac_addresses: vec![],
-			_5ghz_mac_addresses: vec![],
-			_ethernet_mac_addresses: vec![],
-		}
-	}
-}
-
-
 #[derive(Clone, Deserialize, Serialize)]
 pub struct WirelessMacAddresses
 {
