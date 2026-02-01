@@ -43,7 +43,7 @@ impl<'r> FromRow<'r, PgRow> for Service
 				label: row.try_get::<String, &str>("label")?,
 				port: row.try_get::<i16, &str>("port")?,
 				device: DBDevice {
-					band: row.try_get::<Option<String>, &str>("Devices.band")?,
+					band: row.try_get::<String, &str>("Devices.band")?,
 					id: row.try_get::<i32, &str>("Devices.id")?,
 					label: row.try_get::<String, &str>("Devices.label")?,
 					mac: row.try_get::<String, &str>("Devices.mac")?,

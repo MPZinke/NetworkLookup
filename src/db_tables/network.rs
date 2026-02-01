@@ -15,32 +15,6 @@ use serde::Serialize;
 use sqlx::FromRow;
 
 
-// #[macro_use] extern crate enum_str;
-
-
-// enum_str! {
-// 	NetworkType,
-// 	(Asus, "Asus"),
-// 	(NetGear, "NetGear"),
-// }
-pub enum NetworkType
-{
-	Asus,
-	NetGear,
-}
-
-
-// impl NetworkType {
-//     fn as_str(&self) -> &'static str
-//     {
-//         match self {
-//             NetworkType::Asus => "Asus",
-//             NetworkType::NetGear => "NetGear",
-//         }
-//     }
-// }
-
-
 #[derive(FromRow, Serialize)]
 pub struct Network
 {

@@ -16,7 +16,6 @@ mod network;
 mod service;
 
 
-pub use device::{Device as DBDevice, Group as Group};
+pub use device::{Device as DBDevice, Group as Group, ToDBDeviceUpdateString as ToDBDeviceUpdateString};
 pub use network::Network as Network;
-pub use network::NetworkType as NetworkType;
 pub use service::Service as Service;

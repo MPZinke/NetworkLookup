@@ -27,7 +27,7 @@ pub async fn get_device_by_network_id_and_device_id(
 	let query_str: &str = r#"
 		SELECT
 			*,
-			CASE WHEN "band" IS NULL THEN NULL ELSE "band"::TEXT END,
+			"band"::TEXT,
 			array_to_string(
 				array(
 					SELECT "Groups"."label"
@@ -53,7 +53,7 @@ pub async fn get_devices_by_network_id(
 	let query_str: &str = r#"
 		SELECT
 			*,
-			CASE WHEN "band" IS NULL THEN NULL ELSE "band"::TEXT END,
+			"band"::TEXT,
 			array_to_string(
 				array(
 					SELECT "Groups"."label"
@@ -79,7 +79,7 @@ pub async fn get_devices_by_group_label(
 	let query_str: &str = r#"
 		SELECT
 			"Devices".*,
-			CASE WHEN "band" IS NULL THEN NULL ELSE "band"::TEXT END,
+			"band"::TEXT,
 			array_to_string(
 				array(
 					SELECT "Groups"."label"

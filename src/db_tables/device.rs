@@ -29,7 +29,7 @@ pub struct Device
 	pub mac: String,
 	// DB
 	pub id: i32,
-	pub band: Option<String>,
+	pub band: String,
 	pub groups: Vec<Group>,
 	pub network_id: i32,
 	pub static_ip_address: Option<String>,
@@ -48,7 +48,7 @@ impl<'r> FromRow<'r, PgRow> for Device
 				mac: row.try_get::<String, &str>("mac")?,
 				// DB
 				id: row.try_get::<i32, &str>("id")?,
-				band: row.try_get::<Option<String>, &str>("band")?,
+				band: row.try_get::<String, &str>("band")?,
 				groups: row.try_get::<String, &str>("groups")?.split(',').map(|s| s.to_string()).collect(),
 				network_id: row.try_get::<i32, &str>("Networks.id")?,
 				static_ip_address: row.try_get::<Option<String>, &str>("static_ip_address")?,
@@ -70,7 +70,7 @@ impl From<Device> for NetworkDevice
 			ip_address: None,
 			// DB
 			id: Some(db_device.id),
-			band: db_device.band,
+			band: Some(db_device.band),
 			groups: Some(db_device.groups),
 			network_id: db_device.network_id,
 			static_ip_address: db_device.static_ip_address,
@@ -79,14 +79,45 @@ impl From<Device> for NetworkDevice
 }
 
 
-impl Device
+pub trait ToDBDeviceUpdateString
 {
-	pub fn to_static_list_string(&self) -> String
+	fn allowed_list_string(&self, band: &str) -> String;
+	fn static_list_string(&self) -> String;
+}
+
+
+impl ToDBDeviceUpdateString for Vec<Device>
+{
+	fn allowed_list_string(&self, band: &str) -> String
 	{
-		return match(&self.static_ip_address)
-		{
-			Some(static_ip_address) => format!("<{}>{}>>{}", self.mac, static_ip_address, self.label),
-			None => String::from(""),
-		}
+		return self
+		.iter()
+		.filter(|db_device|{&db_device.band == band || &db_device.band == "All"})
+		.map(|db_device|{format!("<{}", db_device.mac)})
+		.collect::<Vec<String>>()
+		.join("");
+	}
+
+
+	fn static_list_string(&self) -> String
+	{
+		return self
+		.iter()
+		.map(
+			|db_device|
+			{
+				match(&db_device.static_ip_address)
+				{
+					None => return String::from(""),
+					Some(static_ip_address)
+					=>
+					{
+						return format!("<{}>{}>>{}", db_device.mac, static_ip_address, db_device.label);
+					},
+				}
+			}
+		)
+		.collect::<Vec<String>>()
+		.join("");
 	}
 }

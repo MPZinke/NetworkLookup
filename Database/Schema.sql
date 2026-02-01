@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS "Devices" CASCADE;
 CREATE TABLE "Devices"
 (
 	"id" SERIAL NOT NULL PRIMARY KEY,
-	"band" Band DEFAULT NULL,
+	"band" Band NOT NULL,
 	"label" VARCHAR(32) NOT NULL DEFAULT '',
 	"mac" CHAR(17) NOT NULL,
 	"Networks.id" INT NOT NULL REFERENCES "Networks"("id") ON DELETE CASCADE,

@@ -20,14 +20,14 @@ use crate::query::services::{get_services, get_service_by_id};
 
 
 // `GET /api/services`
-pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
+pub async fn get_index(pool: web::Data<PgPool>) -> HttpResponse
 {
 	return get_services(pool.as_ref()).await.to_json_response();
 }
 
 
 // `GET /api/services/{id}`
-pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
+pub async fn get_id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
 {
 	let id: i32 = path.into_inner();
 	return get_service_by_id(pool.as_ref(), id).await.to_json_response();

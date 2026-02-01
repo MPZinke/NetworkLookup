@@ -14,14 +14,16 @@
 use reqwest::Client;
 
 
-use crate::db_tables::{DBDevice, Network};
+use crate::db_tables::{DBDevice, ToDBDeviceUpdateString, Network};
 use crate::network::Device;
 
 
+mod allowed_devices;
 mod connected_devices;
 mod static_devices;
 
 
+use allowed_devices::set_allowed_devices;
 use connected_devices::get_devices;
 use static_devices::set_static_devices;
 
@@ -45,7 +47,7 @@ async fn get_asus_token(network: &Network) -> Option<String>
 }
 
 
-pub async fn get_asus_network_devices(network: &Network) -> Option<Vec<Device>>
+pub async fn get_network_devices(network: &Network) -> Option<Vec<Device>>
 {
 	if(network.credentials.is_none())
 	{
@@ -57,7 +59,7 @@ pub async fn get_asus_network_devices(network: &Network) -> Option<Vec<Device>>
 }
 
 
-pub async fn update_asus_static_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
+pub async fn update_allowed_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
 {
 	let asus_token: String = match(get_asus_token(network).await)
 	{
@@ -65,11 +67,24 @@ pub async fn update_asus_static_devices(db_devices: &Vec<DBDevice>, network: &Ne
 		None => return false,
 	};
 
-	let static_list_string: String = db_devices
-	.iter()
-	.map(|db_device|{db_device.to_static_list_string()})
-	.collect::<Vec<String>>()
-	.join("");
+	let _2ghz_allowed_list_string: String = db_devices.allowed_list_string("2.4GHz");
+	let _5ghz_allowed_list_string: String = db_devices.allowed_list_string("5GHz");
 
+	let _2ghz_update_callback = set_allowed_devices(&asus_token, &network.gateway, "2.4GHz", &_2ghz_allowed_list_string);
+	let _5ghz_update_callback = set_allowed_devices(&asus_token, &network.gateway, "5GHz", &_5ghz_allowed_list_string);
+
+	return _2ghz_update_callback.await && _5ghz_update_callback.await;
+}
+
+
+pub async fn update_static_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
+{
+	let asus_token: String = match(get_asus_token(network).await)
+	{
+		Some(asus_token) => asus_token,
+		None => return false,
+	};
+
+	let static_list_string: String = db_devices.static_list_string();
 	return set_static_devices(&asus_token, &network.gateway, &static_list_string).await;
 }

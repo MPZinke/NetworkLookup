@@ -20,14 +20,14 @@ use crate::response::ToJsonResponse;
 
 
 // `GET /api/groups`
-pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
+pub async fn get_index(pool: web::Data<PgPool>) -> HttpResponse
 {
 	return get_groups(pool.as_ref()).await.to_json_response();
 }
 
 
 // `GET /api/groups/{label}`
-pub async fn label(path: web::Path<String>, pool: web::Data<PgPool>) -> HttpResponse
+pub async fn get_label(path: web::Path<String>, pool: web::Data<PgPool>) -> HttpResponse
 {
 	let label = path.into_inner();
 	return get_devices_by_group_label(pool.as_ref(), label).await.to_json_response();

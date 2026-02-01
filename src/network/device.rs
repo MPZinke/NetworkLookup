@@ -70,7 +70,7 @@ impl Device
 
 		self.label = right.label;
 		self.id = Some(right.id);
-		self.band = right.band;
+		self.band = Some(right.band);
 		self.groups = Some(right.groups);
 		self.network_id = right.network_id;
 		self.static_ip_address = right.static_ip_address;

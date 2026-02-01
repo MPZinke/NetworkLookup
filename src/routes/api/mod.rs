@@ -19,8 +19,8 @@ pub mod services;
 use actix_web::{HttpResponse, http::header::ContentType};
 
 
-// `/api`
-pub async fn index() -> HttpResponse
+// `GET /api`
+pub async fn get_index() -> HttpResponse
 {
 	let body: &str = r#"
 	{
