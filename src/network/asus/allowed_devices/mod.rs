@@ -29,7 +29,7 @@ pub async fn set_allowed_devices(
 	};
 
 	let client = Client::new();
-	let response_result: Result<Response, Error> = client.post(format!("http://{}/start_apply.htmi", network_gateway))
+	let response_result: Result<Response, Error> = client.post(format!("http://{}/start_apply.htm", network_gateway))
 	.header("Referer", format!("http://{}/Advanced_DHCP_Content.asp", network_gateway))
 	.header("Cookie", asus_token)
 	.form(
@@ -46,6 +46,6 @@ pub async fn set_allowed_devices(
 	return match(response_result)
 	{
 		Ok(response) => response.status().is_success(),
-		Err(_) => false,
+		Err(error) => {println!("{}", error); false},
 	}
 }

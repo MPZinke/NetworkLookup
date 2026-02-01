@@ -11,7 +11,7 @@
 ***********************************************************************************************************************/
 
 
-use actix_web::{HttpResponse, web::{Data, Path}};
+use actix_web::{HttpResponse, http::header::ContentType, web::{Data, Path}};
 use sqlx::postgres::PgPool;
 
 
@@ -59,18 +59,47 @@ pub async fn get_index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 }
 
 
-// `POST /api/networks/{id}/devices/allowed`
-pub async fn post_allowed(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
+// `GET /api/networks/{id}/devices/allowed`
+pub async fn get_allowed() -> HttpResponse
 {
-	let id: i32 = path.into_inner();
-	let db_devices: Vec<DBDevice> = match(get_devices_by_network_id(pool.as_ref(), id).await)
+	let body: &str = r#"
 	{
-		Ok(db_devices) => db_devices,
-		Err(error) => return error.to_json_response(),
-	};
-
-	return update_allowed_devices(&pool, id, &db_devices).await.to_json_response();
+		"/api/networks/{id}/devices/allowed/2.4GHz": "Update the allowed devices for the 2.4GHz band",
+		"/api/networks/{id}/devices/allowed/5GHz": "Update the allowed devices for the 5GHz band"
+	}
+	"#;
+	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);
 }
+
+
+// `POST /api/networks/{id}/devices/allowed/[(2.4|5)GHz]`
+pub fn post_allowed(band: &'static str) -> impl Fn(Path<i32>, Data<PgPool>) -> std::pin::Pin<Box<dyn std::future::Future<Output = HttpResponse> + Send>>
+	+ Clone
+	+ 'static
+{
+	if(band != "2.4GHz" && band != "5GHz")
+	{
+		panic!("Bad band: '{}'", band);
+	}
+
+	move |path, pool|
+	{
+        Box::pin(
+        	async move
+        	{
+				let id: i32 = path.into_inner();
+				let db_devices: Vec<DBDevice> = match(get_devices_by_network_id(pool.as_ref(), id).await)
+				{
+					Ok(db_devices) => db_devices,
+					Err(error) => return error.to_json_response(),
+				};
+
+				return update_allowed_devices(&pool, id, band, &db_devices).await.to_json_response();
+        	}
+        )
+    }
+}
+
 
 
 // `POST /api/networks/{id}/devices/static`

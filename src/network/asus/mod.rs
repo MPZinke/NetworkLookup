@@ -59,32 +59,29 @@ pub async fn get_network_devices(network: &Network) -> Option<Vec<Device>>
 }
 
 
-pub async fn update_allowed_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
+pub async fn update_allowed_devices(band: &str, db_devices: &Vec<DBDevice>, network: &Network) -> Option<String>
 {
-	let asus_token: String = match(get_asus_token(network).await)
+	let asus_token: String = get_asus_token(network).await?;
+
+	let allowed_list_string: String = db_devices.allowed_list_string(band);
+	if(set_allowed_devices(&asus_token, &network.gateway, band, &allowed_list_string).await)
 	{
-		Some(asus_token) => asus_token,
-		None => return false,
-	};
+		return Some(allowed_list_string);
+	}
 
-	let _2ghz_allowed_list_string: String = db_devices.allowed_list_string("2.4GHz");
-	let _5ghz_allowed_list_string: String = db_devices.allowed_list_string("5GHz");
-
-	let _2ghz_update_callback = set_allowed_devices(&asus_token, &network.gateway, "2.4GHz", &_2ghz_allowed_list_string);
-	let _5ghz_update_callback = set_allowed_devices(&asus_token, &network.gateway, "5GHz", &_5ghz_allowed_list_string);
-
-	return _2ghz_update_callback.await && _5ghz_update_callback.await;
+	return None;
 }
 
 
-pub async fn update_static_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
+pub async fn update_static_devices(db_devices: &Vec<DBDevice>, network: &Network) -> Option<String>
 {
-	let asus_token: String = match(get_asus_token(network).await)
-	{
-		Some(asus_token) => asus_token,
-		None => return false,
-	};
+	let asus_token: String = get_asus_token(network).await?;
 
 	let static_list_string: String = db_devices.static_list_string();
-	return set_static_devices(&asus_token, &network.gateway, &static_list_string).await;
+	if(set_static_devices(&asus_token, &network.gateway, &static_list_string).await)
+	{
+		return Some(static_list_string);
+	}
+
+	return None;
 }

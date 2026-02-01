@@ -30,5 +30,4 @@ pub async fn get_index() -> HttpResponse
 	}
 	"#;
 	return HttpResponse::Ok().insert_header(ContentType::json()).body(body);
-
 }

@@ -44,43 +44,52 @@ pub async fn get_network_devices(pool: &web::Data<PgPool>, network_id: i32) -> O
 }
 
 
-pub async fn update_allowed_devices(pool: &web::Data<PgPool>, network_id: i32, db_devices: &Vec<DBDevice>) -> bool
+pub async fn update_allowed_devices(
+	pool: &web::Data<PgPool>,
+	network_id: i32,
+	band: &str,
+	db_devices: &Vec<DBDevice>
+) -> Option<String>
 {
 	let network: Network = match(get_network_by_id(pool, network_id).await)
 	{
 		Ok(network) => network,
-		Err(_) => return false,
+		Err(_) => return None,
 	};
 	let network_type: &String = match(&network.r#type)
 	{
 		Some(network_type) => network_type,
-		None => return false,
+		None => return None,
 	};
 
 	match(network_type.as_str())
 	{
-		"Asus" => return asus::update_allowed_devices(db_devices, &network).await,
-		&_ => return false,
+		"Asus" => return asus::update_allowed_devices(band, db_devices, &network).await,
+		&_ => return None,
 	}
 }
 
 
-pub async fn update_static_devices(pool: &web::Data<PgPool>, network_id: i32, db_devices: &Vec<DBDevice>) -> bool
+pub async fn update_static_devices(
+	pool: &web::Data<PgPool>,
+	network_id: i32,
+	db_devices: &Vec<DBDevice>
+) -> Option<String>
 {
 	let network: Network = match(get_network_by_id(pool, network_id).await)
 	{
 		Ok(network) => network,
-		Err(_) => return false,
+		Err(_) => return None,
 	};
 	let network_type: &String = match(&network.r#type)
 	{
 		Some(network_type) => network_type,
-		None => return false,
+		None => return None,
 	};
 
 	match(network_type.as_str())
 	{
 		"Asus" => return asus::update_static_devices(db_devices, &network).await,
-		&_ => return false,
+		&_ => return None,
 	}
 }

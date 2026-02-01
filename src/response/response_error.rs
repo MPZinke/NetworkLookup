@@ -21,6 +21,7 @@ use serde::ser::{Serialize, Serializer, SerializeMap};
 #[derive(Debug)]
 pub enum ResponseError
 {
+	Generic(std::io::Error),
 	InvalidHeader(reqwest::header::InvalidHeaderValue),
 	NotFound(std::io::Error),
 	Postgres(sqlx::error::Error),
@@ -47,6 +48,7 @@ impl std::fmt::Display for ResponseError
 	{
 		match(self)
 		{
+			ResponseError::Generic(error) => write!(format, "{}", error),
 			ResponseError::InvalidHeader(error) => write!(format, "{}", error),
 			ResponseError::NotFound(error) => write!(format, "{}", error),
 			ResponseError::Postgres(error) => write!(format, "{}", error),
