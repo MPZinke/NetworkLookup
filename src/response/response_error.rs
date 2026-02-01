@@ -28,6 +28,7 @@ pub enum ResponseError
 }
 
 
+// FROM: https://serde.rs/impl-serialize.html#serializing-a-sequence-or-map
 impl Serialize for ResponseError
 {
 	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>

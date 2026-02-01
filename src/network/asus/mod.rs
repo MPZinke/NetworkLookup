@@ -14,19 +14,20 @@
 use reqwest::Client;
 
 
-use crate::db_tables::Network;
+use crate::db_tables::{DBDevice, Network};
 use crate::network::Device;
 
 
-mod devices;
+mod connected_devices;
+mod static_devices;
 
 
-use devices::get_devices;
+use connected_devices::get_devices;
+use static_devices::set_static_devices;
 
 
 async fn get_asus_token(network: &Network) -> Option<String>
 {
-	// let client = Client::builder().cookie_store(true).build().ok()?;
 	let client = Client::new();
 	let response = client.post(format!("http://{}/login.cgi", network.gateway))
 	.header("Referer", format!("http://{}/Main_Login.asp", network.gateway))
@@ -44,7 +45,7 @@ async fn get_asus_token(network: &Network) -> Option<String>
 }
 
 
-pub async fn get_network_devices(network: &Network) -> Option<Vec<Device>>
+pub async fn get_asus_network_devices(network: &Network) -> Option<Vec<Device>>
 {
 	if(network.credentials.is_none())
 	{
@@ -53,4 +54,22 @@ pub async fn get_network_devices(network: &Network) -> Option<Vec<Device>>
 
 	let asus_token: String = get_asus_token(network).await?;
 	return get_devices(&asus_token, network).await;
+}
+
+
+pub async fn update_asus_static_devices(db_devices: &Vec<DBDevice>, network: &Network) -> bool
+{
+	let asus_token: String = match(get_asus_token(network).await)
+	{
+		Some(asus_token) => asus_token,
+		None => return false,
+	};
+
+	let static_list_string: String = db_devices
+	.iter()
+	.map(|db_device|{db_device.to_static_list_string()})
+	.collect::<Vec<String>>()
+	.join("");
+
+	return set_static_devices(&asus_token, &network.gateway, &static_list_string).await;
 }

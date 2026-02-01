@@ -16,12 +16,12 @@ use sqlx::postgres::PgPool;
 
 
 use crate::db_tables::DBDevice;
-use crate::network::{lookup, Device, ToDeviceVector};
-use crate::response::ToJsonResponse;
+use crate::network::{get_network_devices, update_static_devices, Device, ToDeviceVector};
 use crate::query::devices::{get_devices_by_network_id, get_device_by_network_id_and_device_id};
+use crate::response::ToJsonResponse;
 
 
-// `/api/networks/{id}/devices`
+// `GET /api/networks/{id}/devices`
 pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 {
 	let id: i32 = path.into_inner();
@@ -31,7 +31,7 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 		Err(error) => return error.to_json_response(),
 	};
 
-	let mut network_devices: Vec<Device> = match(lookup(&pool, id).await)
+	let mut network_devices: Vec<Device> = match(get_network_devices(&pool, id).await)
 	{
 		Some(network_devices) => network_devices,
 		None => return db_devices.to_device_vec().to_json_response(),
@@ -59,7 +59,21 @@ pub async fn index(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
 }
 
 
-// `/api/networks/{network_id}/devices/{device_id}`
+// `POST /api/networks/{id}/devices/update`
+pub async fn update(path: Path<i32>, pool: Data<PgPool>) -> HttpResponse
+{
+	let id: i32 = path.into_inner();
+	let db_devices: Vec<DBDevice> = match(get_devices_by_network_id(pool.as_ref(), id).await)
+	{
+		Ok(db_devices) => db_devices,
+		Err(error) => return error.to_json_response(),
+	};
+
+	return update_static_devices(&pool, id, &db_devices).await.to_json_response();
+}
+
+
+// `GET /api/networks/{network_id}/devices/{device_id}`
 pub async fn id(path: Path<(i32, i32)>, pool: Data<PgPool>) -> HttpResponse
 {
 	let (network_id, device_id) = path.into_inner();
@@ -71,7 +85,7 @@ pub async fn id(path: Path<(i32, i32)>, pool: Data<PgPool>) -> HttpResponse
 		Err(error) => return error.to_json_response(),
 	};
 
-	let mut network_devices: Vec<Device> = match(lookup(&pool, network_id).await)
+	let mut network_devices: Vec<Device> = match(get_network_devices(&pool, network_id).await)
 	{
 		Some(network_devices) => network_devices,
 		None => return Device::from(db_device).to_json_response(),

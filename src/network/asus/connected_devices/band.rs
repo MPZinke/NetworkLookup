@@ -18,7 +18,12 @@ use serde::Deserialize;
 use crate::network::Device;
 
 
-use crate::network::asus::devices::types::band::{InterfacesMacAddresses, Interface, MacAddresses, WirelessMacAddresses};
+use crate::network::asus::connected_devices::types::band::{
+	InterfacesMacAddresses,
+	Interface,
+	MacAddresses,
+	WirelessMacAddresses
+};
 
 
 async fn get_devices_bands_raw_data(asus_token: &String, network_gateway: &String) -> Option<String>

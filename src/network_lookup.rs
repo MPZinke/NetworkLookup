@@ -55,6 +55,7 @@ async fn main() -> std::io::Result<()>
 			.route("/api/networks", web::get().to(api::networks::index))
 			.route("/api/networks/{id}", web::get().to(api::networks::id))
 			.route("/api/networks/{network_id}/devices", web::get().to(api::networks::devices::index))
+			.route("/api/networks/{network_id}/devices/update", web::post().to(api::networks::devices::update))
 			.route("/api/networks/{network_id}/devices/{device_id}", web::get().to(api::networks::devices::id))
 			.route("/api/services", web::get().to(api::services::index))
 			.route("/api/services/{id}", web::get().to(api::services::id))

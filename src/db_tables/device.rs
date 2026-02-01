@@ -77,3 +77,16 @@ impl From<Device> for NetworkDevice
 		};
 	}
 }
+
+
+impl Device
+{
+	pub fn to_static_list_string(&self) -> String
+	{
+		return match(&self.static_ip_address)
+		{
+			Some(static_ip_address) => format!("<{}>{}>>{}", self.mac, static_ip_address, self.label),
+			None => String::from(""),
+		}
+	}
+}

@@ -2,7 +2,7 @@
 /***********************************************************************************************************************
 *                                                                                                                      *
 *   created by: MPZinke                                                                                                *
-*   on 2022.05.07                                                                                                      *
+*   on 2026.01.31                                                                                                      *
 *                                                                                                                      *
 *   DESCRIPTION: TEMPLATE                                                                                              *
 *   BUGS:                                                                                                              *
@@ -11,24 +11,22 @@
 ***********************************************************************************************************************/
 
 
-use actix_web::{HttpResponse, web};
-use sqlx::postgres::PgPool;
+use reqwest::{Client, Error, Response};
 
 
-use crate::query::{devices::get_devices_by_group_label, groups::get_groups};
-use crate::response::ToJsonResponse;
-
-
-// `GET /api/groups`
-pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
+pub async fn set_static_devices(asus_token: &String, network_gateway: &String, static_list_string: &String) -> bool
 {
-	return get_groups(pool.as_ref()).await.to_json_response();
-}
+	let client = Client::new();
+	let response_result: Result<Response, Error> = client.post(format!("http://{}/start_apply.htmi", network_gateway))
+	.header("Referer", format!("http://{}/Advanced_DHCP_Content.asp", network_gateway))
+	.header("Cookie", asus_token)
+	.form(&[("action_mode", "apply_new"), ("dhcp_staticlist", static_list_string)])
+	.send()
+	.await;
 
-
-// `GET /api/groups/{label}`
-pub async fn label(path: web::Path<String>, pool: web::Data<PgPool>) -> HttpResponse
-{
-	let label = path.into_inner();
-	return get_devices_by_group_label(pool.as_ref(), label).await.to_json_response();
+	return match(response_result)
+	{
+		Ok(response) => response.status().is_success(),
+		Err(_) => false,
+	}
 }

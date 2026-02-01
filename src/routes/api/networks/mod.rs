@@ -24,7 +24,7 @@ use crate::response::ToJsonResponse;
 use crate::query::{query_to_response, networks::{get_networks, get_network_by_id}};
 
 
-// `/api/networks`
+// `GET /api/networks`
 pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 {
 	let query_response: Result<Vec<Network>, ResponseError> = get_networks(pool.as_ref()).await;
@@ -32,7 +32,7 @@ pub async fn index(pool: web::Data<PgPool>) -> HttpResponse
 }
 
 
-// `/api/networks/{network_id}`
+// `GET /api/networks/{network_id}`
 pub async fn id(path: web::Path<i32>, pool: web::Data<PgPool>) -> HttpResponse
 {
 	let id: i32 = path.into_inner();
