@@ -33,9 +33,9 @@ use crate::routes::api;
 #[actix_web::main]
 async fn main() -> std::io::Result<()>
 {
-	let host: &str = "localhost";
-	let user: &str = env!("NETWORKLOOKUP_DB_USER");
-	let password: &str = env!("NETWORKLOOKUP_DB_PASSWORD");
+	let host: String = std::env::var("NETWORKLOOKUP_DB_HOST").unwrap();
+	let user: String = std::env::var("NETWORKLOOKUP_DB_USER").unwrap();
+	let password: String = std::env::var("NETWORKLOOKUP_DB_PASSWORD").unwrap();
 	let db_name: &str = "NetworkLookup";
 
 	let connection_str: String = format!("postgres://{}:{}@{}:5432/{}", user, password, host, db_name);

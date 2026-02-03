@@ -1,0 +1,16 @@
+services:
+  network-lookup:
+    container_name: network-lookup
+    image: network-lookup:1.0.0
+    build:
+      dockerfile: ./Dockerfile
+    environment:
+      - NETWORKLOOKUP_DB_HOST=host.docker.internal
+      - NETWORKLOOKUP_DB_USER=${NETWORKLOOKUP_DB_USER}
+      - NETWORKLOOKUP_DB_PASSWORD=${NETWORKLOOKUP_DB_PASSWORD}
+    ports:
+      - 443:443
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: "unless-stopped"
+    tty: true

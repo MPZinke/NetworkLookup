@@ -1,24 +1,18 @@
-FROM rust:1.63
+# FROM: https://hub.docker.com/_/rust/
+FROM rust:1.92-bullseye AS builder
 
-# ——————————————————————————————————————————————————— INSTALLATION ——————————————————————————————————————————————————— #
-
-COPY source .
-
-ARG NETWORKLOOKUP_BEARERTOKEN
-ARG NETWORKLOOKUP_ROUTER_DOMAIN
-ARG NETWORKLOOKUP_DB_USER
-ARG NETWORKLOOKUP_DB_PASSWORD
-
-ENV NETWORKLOOKUP_BEARERTOKEN=${NETWORKLOOKUP_BEARERTOKEN}
-ENV NETWORKLOOKUP_ROUTER_DOMAIN=${NETWORKLOOKUP_ROUTER_DOMAIN}
-ENV NETWORKLOOKUP_DB_USER=${NETWORKLOOKUP_DB_USER}
-ENV NETWORKLOOKUP_DB_PASSWORD=${NETWORKLOOKUP_DB_PASSWORD}
+WORKDIR /usr/
+COPY src/ src/
+COPY Cargo.toml Cargo.toml
 
 RUN cargo install --path .
 
+# ---------------------- #
 
-# ————————————————————————————————————————————————————— RUNTIME ————————————————————————————————————————————————————— #
+FROM debian:bullseye-slim
+RUN apt update && apt install -y ca-certificates glibc-source && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/local/cargo/bin/network_lookup /usr/local/bin/network_lookup
 
-EXPOSE 8081
+EXPOSE 443
 
-CMD ["NetworkLookup"]
+ENTRYPOINT ["network_lookup"]
